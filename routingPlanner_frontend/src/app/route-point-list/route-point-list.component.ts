@@ -17,6 +17,10 @@ export class RoutePointListComponent implements OnInit{
   
   route_points: RoutePoint[] = [];
 
+  seq: string ='';
+  startPoint: string ='';
+  person: string ='';
+
   constructor(public routePointService: RoutePointService){ }
 
   ngOnInit(){
@@ -24,6 +28,25 @@ export class RoutePointListComponent implements OnInit{
       this.route_points = data;
       console.log("THIS: " + this.route_points)
     });
+  }
+
+  onSubmit(): void {
+    const newRoutePoint: RoutePoint = {
+      id: 0,
+      seq: parseInt(this.seq, 10),
+      startPoint: parseInt(this.startPoint, 10),
+      person: parseInt(this.person, 10)
+    };
+    this.routePointService.save(newRoutePoint).subscribe(
+      (response) => {
+        console.log('Route point added successfully:', response);
+        // You can add further logic here, such as resetting the form or displaying a success message
+      },
+      (error) => {
+        console.error('Error adding route point:', error);
+        // Handle error scenario, such as displaying an error message to the user
+      }
+    );
   }
 
 

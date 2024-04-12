@@ -1,6 +1,7 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import * as L from 'leaflet';
 import 'leaflet-routing-machine';
+import 'leaflet/dist/leaflet.css'
 
 
 @Component({
@@ -12,11 +13,10 @@ import 'leaflet-routing-machine';
 export class MapComponent implements AfterViewInit {
 
   public routesData = [
-    { routeName: "Route 1", sequenceNumber: 1, coordinates: ["-22.985308", "-43.204845"] },
-    { routeName: "Route 1", sequenceNumber: 2, coordinates: ["-22.983449", "-43.202773"] },
-    { routeName: "Route 2", sequenceNumber: 1, coordinates: ["-22.980308", "-43.214845"] },
-    { routeName: "Route 2", sequenceNumber: 2, coordinates: ["-22.973449", "-43.212773"] },
-    { routeName: "Route 2", sequenceNumber: 3, coordinates: ["-22.993449", "-43.192773"] }
+    { routeName: "Route 1", sequenceNumber: 1, coordinates: [47.6097, 13.0419] },
+    { routeName: "Route 1", sequenceNumber: 2, coordinates: [47.507603, 15.724283] },
+    { routeName: "Route 2", sequenceNumber: 1, coordinates: [47.316917, 15.421834] },
+    { routeName: "Route 2", sequenceNumber: 2, coordinates: [47.207603, 15.724283] }
   ];
   
 
@@ -36,7 +36,8 @@ export class MapComponent implements AfterViewInit {
 
   private initializeMap() {
     const baseMapURl = 'https://tile.jawg.io/jawg-dark/{z}/{x}/{y}{r}.png?access-token=9EPuY0KcdIk7nGeNgjz84t4v6YXWvE33qACJMNKYfX0m1UfytsyWERuzVJ3rR7Sk'
-    this.map = L.map('map').setView([31.9539, 35.9106],  1);
+    //const baseMapURl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    this.map = L.map('map').setView([48.2082,16.3719],  10);
     L.tileLayer(baseMapURl).addTo(this.map);
   }
 
@@ -50,8 +51,6 @@ export class MapComponent implements AfterViewInit {
 
   public getPoints(routeData: any): number[][] {
     console.dir(routeData);
-    console.log("Route 0: " + routeData[0]);
-    console.log("Route 1: " + routeData[1]);
 
     var coordinates: number[][] = [];
 
@@ -93,7 +92,10 @@ export class MapComponent implements AfterViewInit {
             styles: [{ color: index === 0 ? '#5733ff' : '#ff5733', opacity: 1, weight: 3 }],
             extendToWaypoints: true,
             missingRouteTolerance: 10
-          }
+          },
+          router: L.Routing.osrmv1({
+            serviceUrl: "http://localhost:5000/route/v1",
+          })
         }).addTo(this.map);
 
       const routingControlContainer = innerRoute[index].getContainer();

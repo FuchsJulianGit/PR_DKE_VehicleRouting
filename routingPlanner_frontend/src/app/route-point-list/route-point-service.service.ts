@@ -17,11 +17,11 @@ export class RoutePointService {
     return this.http.get<RoutePoint[]>(this.baseurl + 'RoutePoints');
   }
   
-  /*
-  public save(route_point: RoutePoint){
-    return this.http.post<RoutePoint>(this.baseurl + 'RoutePoints', route_point);
+  
+  save(route_point: RoutePoint): Observable<RoutePoint> {
+    return this.http.post<RoutePoint>(this.baseurl + 'addRoutePoint', route_point);
   }
-*/
+
   public findAll(): Observable<RoutePoint[]>{
     return this.http.get<RoutePoint[]>(this.baseurl + 'RoutePoints');
   }

@@ -19,3 +19,21 @@
       </table>
     </div>
   </div>
+
+
+  <br><br>
+  <form id="routePointForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="seq">Sequence Number</label>
+      <input type="text" class="form-control" id="seq" name="seq" [(ngModel)]="seq" required>
+    </div>
+    <div class="form-group">
+      <label for="startPoint">Start Point</label>
+      <input type="text" class="form-control" id="startPoint" name="startPoint" [(ngModel)]="startPoint" required>
+    </div>
+    <div class="form-group">
+      <label for="person">Person</label>
+      <input type="text" class="form-control" id="person" name="person" [(ngModel)]="person" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>

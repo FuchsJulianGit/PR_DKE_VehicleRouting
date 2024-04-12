@@ -5,11 +5,13 @@ import { AppComponent } from './app.component';
 import { RoutePointListComponent } from './route-point-list/route-point-list.component';
 import { LoginComponent } from './login/login.component';
 import { MapComponent } from './map/map.component';
+import { PlannerComponent } from './planner/planner.component';
 
 export const routes: Routes = [
    { path: '', component: RoutePointListComponent},
    { path: 'login', component: LoginComponent },
-   { path: 'map', component: MapComponent } 
+   { path: 'map', component: MapComponent },
+   { path: 'planner', component: PlannerComponent }  
 ];
 
 @NgModule({
