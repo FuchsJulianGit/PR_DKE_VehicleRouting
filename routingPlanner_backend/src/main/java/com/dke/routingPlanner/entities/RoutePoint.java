@@ -32,9 +32,7 @@ public class RoutePoint {
         return seq;
     }
 
-    public void setSeq(int seq) {
-        this.seq = seq;
-    }
+    public void setSeq(int seq) { this.seq = seq; }
 
     public int getStartPoint() {
         return startPoint;

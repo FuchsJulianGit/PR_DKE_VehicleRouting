@@ -1,0 +1,311 @@
+.container{
+    display: flex;
+    flex-wrap: wrap;
+    background-color: aqua;
+    height: 100vh;
+    width: 100%;
+    margin: 0 !important;
+
+}
+
+
+.sidebar {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 30%;
+    height: 100%;
+    background-color: #ffffff;
+    overflow-y: auto;
+    padding: 2rem;
+    box-sizing: border-box;
+    user-select: none;
+  }
+  
+.sidebar .fixedHeader{
+  position: fixed;
+  background-color: #ffffff;
+  height: 5.5rem;
+  margin-bottom: -2rem;
+  margin-top: -2rem;
+  margin-left: -2rem;
+  width: inherit;
+  z-index: 5;
+}
+
+
+.sidebar .fixedHeader h2{
+  text-transform: uppercase;
+  font-weight: bolder;
+  font-stretch: expanded;
+  padding: 0;
+  margin-bottom: -2rem;
+  margin-top: 2rem;
+  margin-left: 2rem;
+  //position: fixed;
+  width: 100% !important;
+}
+
+
+  .map-outter-container{
+    position: relative;
+    flex: 1;
+    height: 100%;
+    background-color: #eeff00;
+    overflow-y: auto;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  .map-container {
+    margin-left: 20%;
+    padding: 20px;
+    box-sizing: border-box;
+
+    position: relative !important;
+    width: 100%;
+  }
+  
+  /* Ensure sidebar is at least 200px wide */
+  .sidebar {
+    min-width: 200px;
+  }
+  
+
+  .sidebar {
+    /* Your existing sidebar styles */
+
+     li, ul{
+      list-style-type: none !important;
+      padding-left: 0 !important;
+     }
+  }
+  
+
+/// Sidebar
+
+.vehicle-label:hover {
+  background-color: #f0f0f0;
+}
+
+.vehicle-radio {
+  margin-right: 10px;
+}
+
+.vehicle-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.vehicle-title {
+  font-size: 2rem;
+  font-weight: 300;
+  color: #333;
+}
+
+.company-name {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #999;
+  padding-left: 0.1rem;
+}
+
+.seating-places {
+  font-size: 12px;
+  color: #888;
+}
+
+.wheelchair-icon, .seating-icon {
+  margin-top: 5px;
+  display: flex;
+  font-size: 1.6rem;
+  padding-right: 0.3rem;
+  opacity: 0.5;
+}
+
+.wheelchair-icon img, .seating-icon img {
+  width: 1.6rem;
+  opacity: 0.5;
+}
+
+.seating{
+  display: flex;
+}
+
+
+
+/// Icon
+
+
+.vehicle-label-outter {
+  display: flex;
+  align-items: center;
+  padding: 1.6rem 0rem 1.6rem 0rem;
+  cursor: pointer;
+  transition: background-color 0.6s ease;
+  border-bottom: solid #ECECEC;
+  flex-wrap: wrap;
+}
+
+.vehicle-label-outter:hover {
+  background-color: #D3D3D3 !important;
+}
+
+.vehicle-label.selected .vehicle-icon{
+  background-color:  #277FC9;
+}
+
+.vehicle-label {
+  display: flex;
+  align-items: center;
+  padding: 1rem 2rem 1rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.6s ease;
+}
+
+/*.vehicle-label:hover {
+  background-color: #f0f0f0;
+  transition: 0.6s;
+}*/
+
+.vehicle-radio {
+  display: none; /* Hide the radio button */
+}
+
+.vehicle-selector {
+  width: 50px; /* Adjust the size of the selector */
+  height: 50px;
+  display: inline-block;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.vehicle-selector:hover {
+  background-color: #f0f0f0;
+}
+
+.vehicle-icon {
+  width: 100%;
+  height: 100%;
+  min-height: 3.6rem;
+  min-width: 3.6rem;
+  padding: 1.2rem;
+  border-radius: 1.6rem;
+  border: solid 0.3rem #E9e9e9;
+    background-color: #F1F1F1;
+
+  display: flex;
+  align-items: center;
+}
+
+.selected .vehicle-selector {
+  background-color: #4a90e2; 
+}
+
+.vehicle-icon img {
+  width: 100%;
+  opacity: 1;
+}
+
+.vehicle-details {
+  flex: 1;
+}
+
+.selected .vehicle-selector {
+  background-color: #4a90e2; 
+  background-color: linear-gradient(to bottom, #4a90e2, #4aaae2);
+}
+
+
+.selected .vehicle-icon img {
+  filter:invert(100);
+}
+
+.shrunk {
+  height: 0 !important;
+  padding: 0;
+  opacity: 0;
+  overflow: hidden;
+
+  transition: height 0.6s ease, padding 0.6s ease, opacity 0.3s ease-in; /* Add transition effect */
+  border: none !important;
+}
+
+.vehicle-label-outter:not(.shrunk){
+  transition: height 0.6s ease, padding 0.6s ease, opacity 0.3s ease-in;
+}
+
+.shrunk > img{
+  opacity: 0.2;
+}
+
+.person-icon {
+  width: aut;
+  height: 100%;
+  min-height: 3.6rem;
+  min-width: 3.6rem;
+  padding: 1.2rem;
+  border-radius: 1.6rem;
+  border: solid 0.3rem #E9e9e9;
+  background-color: #F1F1F1;
+  display: flex;
+  align-items: center;
+}
+
+.person-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 1.2rem 0;
+}
+
+.person-checkbox {
+  display: none; 
+}
+
+.person-checkbox + .person-icon {
+  margin-right: 10px;
+}
+
+.person-checkbox:checked + .person-icon img {
+  filter: invert(100%);
+}
+
+
+.person-icon img {
+  width: 3.6rem;
+  height: 3.6rem;
+  opacity: 1;
+}
+
+.person-details {
+  flex: 1;
+}
+
+.person-title {
+  font-size: 2rem;
+  font-weight: 300;
+  color: #333;
+}
+
+.person-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column; 
+}
+
+.person-name {
+  font-size: 1.6rem; 
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.person-company,
+.person-coordinates {
+  font-size: 1.2rem;
+  color: #999;
+}

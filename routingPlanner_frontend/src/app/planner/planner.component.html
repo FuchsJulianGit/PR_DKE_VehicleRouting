@@ -1,0 +1,70 @@
+<!-- map-page.component.html -->
+
+<div class="container">
+    <div class="sidebar">
+        <div class="fixedHeader">
+            <h2>Fahrzeugauswahl</h2>
+        </div>
+        <ul>
+        <!--<li *ngFor="let vehicle of vehicles" (click)="onVehicleSelected(vehicle)">{{ vehicle.name }}</li>-->
+        <li><br></li>
+        <li *ngFor="let vehicle of vehicles" (click)="selectCheckbox(vehicle, $event)">
+            <label class="vehicle-label-outter" >
+              <input type="radio" name="vehicle" class="vehicle-radio" [value]="vehicle" id="checkbox-vehicle-{{ vehicle.Id }}">
+              
+              
+              <label class="vehicle-label vehicle-{{ vehicle.Id }}" [class.selected]="selectedVehicle === vehicle" >
+                <div class="vehicle-icon">
+                    <img src="assets/van-shuttle-solid.svg" alt="Vehicle Icon">
+                </div>
+              </label>
+
+              <div class="vehicle-info">
+                <div class="vehicle-title">{{ vehicle.VehicleDescription }}</div>
+                <div class="company-name">{{ vehicle.CompanyName }}</div>
+                
+                <div class="seating">
+                    <div class="seating-icon" *ngIf="vehicle.seatingPlaces">
+                        <div class="seatNR">{{ vehicle.seatingPlaces }}</div>
+                        <img src="../../assets/person-seat.svg" alt="Seat Accessible">
+                    </div>
+                    
+                    <div class="wheelchair-icon" *ngIf="vehicle.canTransportWheelchairs">
+                        <div class="seatNR">1</div>
+                        <img src="../../assets/wheelchair-solid.svg" alt="Wheelchair Accessible">
+                    </div>
+            </div>
+              </div>
+
+              <div class="people-list" *ngIf="selectedVehicle">
+                <h3>{{ selectedVehicle.CompanyName }} Employees:</h3>
+                <ul>
+                    <li *ngFor="let person of getPeopleByCompany(selectedVehicle.CompanyName)">
+                        <label class="person-label">
+                        <input type="checkbox" class="person-checkbox">
+                        <div class="person-icon">
+                            <img src="../../assets/wheelchair-solid.svg" alt="Person Icon">
+                        </div>
+                        <div class="person-details">
+                            <span class="person-name">{{ person.name }}</span>
+                            <span class="person-company">{{ person.company }}</span>
+                            <span class="person-coordinates">{{ person.startCoordinate.x }}, {{ person.startCoordinate.y }}</span>
+                        </div>
+                    </label>
+                    </li>
+                </ul>
+            </div>
+            </label>
+
+
+          
+
+          </li>
+        </ul>
+  </div>
+  
+  <div class="map-outter-container">
+    <app-map></app-map>
+  </div>
+</div>
+  
