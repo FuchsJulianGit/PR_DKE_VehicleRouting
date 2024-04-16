@@ -4,21 +4,27 @@
     <div class="sidebar">
         <div class="fixedHeader">
             <h2>Fahrzeugauswahl</h2>
+
+            <select t class="custom-select" [(ngModel)]="selectedCompany" (change)="onCompanySelected()">
+              <option *ngFor="let company of companies" [value]="company">{{ company }}</option>
+            </select>
+
         </div>
+
+       
+
         <ul>
         <!--<li *ngFor="let vehicle of vehicles" (click)="onVehicleSelected(vehicle)">{{ vehicle.name }}</li>-->
-        <li><br></li>
-        <li *ngFor="let vehicle of vehicles" (click)="selectCheckbox(vehicle, $event)">
+        <li *ngFor="let vehicle of getFilteredVehicles()" >
             <label class="vehicle-label-outter" >
+              
+            <div class="vehicle-highlight" (click)="selectCheckbox(vehicle, $event)">
               <input type="radio" name="vehicle" class="vehicle-radio" [value]="vehicle" id="checkbox-vehicle-{{ vehicle.Id }}">
-              
-              
               <label class="vehicle-label vehicle-{{ vehicle.Id }}" [class.selected]="selectedVehicle === vehicle" >
                 <div class="vehicle-icon">
                     <img src="assets/van-shuttle-solid.svg" alt="Vehicle Icon">
                 </div>
               </label>
-
               <div class="vehicle-info">
                 <div class="vehicle-title">{{ vehicle.VehicleDescription }}</div>
                 <div class="company-name">{{ vehicle.CompanyName }}</div>
@@ -35,25 +41,31 @@
                     </div>
             </div>
               </div>
-
+            </div>
+          
               <div class="people-list" *ngIf="selectedVehicle">
                 <h3>{{ selectedVehicle.CompanyName }} Employees:</h3>
                 <ul>
                     <li *ngFor="let person of getPeopleByCompany(selectedVehicle.CompanyName)">
                         <label class="person-label">
-                        <input type="checkbox" class="person-checkbox">
+                        <!--<input type="checkbox" class="person-checkbox">-->
                         <div class="person-icon">
-                            <img src="../../assets/wheelchair-solid.svg" alt="Person Icon">
+                            <img src="../../assets/user-solid.svg" alt="Person Icon">
                         </div>
                         <div class="person-details">
                             <span class="person-name">{{ person.name }}</span>
                             <span class="person-company">{{ person.company }}</span>
                             <span class="person-coordinates">{{ person.startCoordinate.x }}, {{ person.startCoordinate.y }}</span>
                         </div>
+
+                        <div class="checkbox">
+                            <input type="checkbox" name="person" class="person-checkbox" [value]="person_selection" id="checkbox-people-{{ person.id }}" checked>
+                        </div>
                     </label>
                     </li>
                 </ul>
             </div>
+
             </label>
 
 
@@ -63,8 +75,15 @@
         </ul>
   </div>
   
+  <div class="submit hide">
+    <button class="btn btn-primary" (click)="submitSelectedRoute()">Submit Route</button>
+  </div>
+
   <div class="map-outter-container">
-    <app-map></app-map>
+   <!--<app-map></app-map> --> 
+    <!-- <app-map [mapCoordinatesInput]="getMapCoordinates()"></app-map> -->
+    <app-map [inputValue]="getMapCoordinates()"></app-map>
+
   </div>
 </div>
   

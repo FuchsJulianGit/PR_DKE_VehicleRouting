@@ -1,4 +1,6 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { publishFacade } from '@angular/compiler';
+import { AfterViewInit, Component, Input,  OnChanges, SimpleChanges, input, numberAttribute } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import * as L from 'leaflet';
 import 'leaflet-routing-machine';
 import 'leaflet/dist/leaflet.css'
@@ -10,7 +12,14 @@ import 'leaflet/dist/leaflet.css'
   styleUrls: ['./map.component.scss']
 })
 
-export class MapComponent implements AfterViewInit {
+export class MapComponent implements AfterViewInit, OnChanges {
+
+//  @Input() mapCoordinatesInput: any[] = [];
+
+  @Input() inputValue: [any[], boolean] = [[], false];
+  public mapCoordinatesInput: any[] = [];
+  public inputType: boolean = false;
+//mapCoordinatesInput
 
   public routesData = [
     { routeName: "Route 1", sequenceNumber: 1, coordinates: [47.6097, 13.0419] },
@@ -19,19 +28,72 @@ export class MapComponent implements AfterViewInit {
     { routeName: "Route 2", sequenceNumber: 2, coordinates: [47.207603, 15.724283] }
   ];
   
+  public mapCoordinates: any[] = [];
+
+
+
+  /*public markerCoordinates = [
+    {coordinates: [47.6097, 13.0419] },
+    {coordinates: [47.507603, 15.724283] },
+    {coordinates: [47.6097, 15.724283] }
+  ]*/
 
   private map!: L.Map;
   private markers: L.Marker[] = [];
+  private mapInitialized: boolean = false;
+  private innerRoute: any[] = [];
 
   constructor() { }
 
   ngOnInit() {
+
   }
 
   ngAfterViewInit() {
     this.initializeMap();
-    this.addMarkers();
-    this.initializeRouting();
+    this.mapInitialized = true;
+  //  this.initializeRouting();
+  }
+
+
+  private previousInput: any = null;
+
+  ngOnChanges(changes: SimpleChanges): void {
+
+    const [mapCoordinatesInput, inputType] = this.inputValue;
+    this.mapCoordinatesInput = mapCoordinatesInput;
+    this.inputType = inputType;
+
+  //Draw Routes 
+    if(inputType == false){
+      if(this.mapCoordinatesInput != undefined && this.mapInitialized == true){
+        if( JSON.stringify(this.mapCoordinates) !==  JSON.stringify(this.mapCoordinatesInput)){
+          this.mapCoordinates = this.mapCoordinatesInput;
+          this.initializeRouting();
+        }}
+    }
+
+    //Draw Markers
+    if(inputType == true){
+      if(this.mapCoordinatesInput != undefined && this.mapInitialized == true){
+      if( JSON.stringify(this.mapCoordinates) !==  JSON.stringify(this.mapCoordinatesInput)){
+        let x = 0;
+        let y = 0;
+
+        for (let i = 0; i < this.mapCoordinatesInput.length; i++) {
+          x += this.mapCoordinatesInput[i][0];  
+          y += this.mapCoordinatesInput[i][1];
+        }
+        x = x / this.mapCoordinatesInput.length;
+        y = y / this.mapCoordinatesInput.length;
+
+       try { this.map.fitBounds(this.mapCoordinatesInput); } catch (error) { }
+      
+        this.mapCoordinates = this.mapCoordinatesInput;
+        this.drawMarkers();
+    }
+     }
+    }
   }
 
   private initializeMap() {
@@ -41,16 +103,46 @@ export class MapComponent implements AfterViewInit {
     L.tileLayer(baseMapURl).addTo(this.map);
   }
 
-  private addMarkers() {
+  private resetMap(){
+ 
+   this.markers.forEach(marker => {
+      marker.remove();
+    });
+
+    this.innerRoute.forEach(control => {
+      control.remove();
+    });
+
+  }
+
+  private drawMarkers() {
+    this.resetMap();
+
+    this.markers = [];
+    Object.values(this.mapCoordinates).forEach((markerCoord: any, index) => {
+      if (!this.isMarkerDrawn(markerCoord)) {
+      var marker = L.marker(this.mapCoordinates[index]).addTo(this.map);
+      this.markers.push(marker);
+      }
+    });
+}
+
+private isMarkerDrawn(markerCoord: any): boolean {
+  return this.markers.some(marker => {
+    return marker.getLatLng().equals(L.latLng(markerCoord.coordinates));
+  });
+}
+
+ /* private addRouteMarkers() {
     this.markers.forEach(marker => marker.removeFrom(this.map));
     this.markers = [];
     this.routesData.forEach(routeData => {
       var coordinates: L.LatLngTuple = [Number(routeData.coordinates[0]), Number(routeData.coordinates[1])];
     });
-  }
+  }*/
 
   public getPoints(routeData: any): number[][] {
-    console.dir(routeData);
+    //console.dir(routeData);
 
     var coordinates: number[][] = [];
 
@@ -60,12 +152,13 @@ export class MapComponent implements AfterViewInit {
       coordinates.push([lat, lng]);
     });
 
-    console.dir(coordinates);
+    //console.dir(coordinates);
 
     return coordinates;
   }
 
   private initializeRouting() {
+    this.resetMap();
     const groupedRoutes = this.groupRoutesByRouteName(this.routesData);
 
     Object.values(groupedRoutes).forEach((routes: any[], index) => {
@@ -73,10 +166,7 @@ export class MapComponent implements AfterViewInit {
       var group = L.featureGroup();
       var latlngArray = [];
       var input = this.getPoints(routes);
-      var innerRoute = [];
-      
-      console.log("input: " + input[0]);
-      console.log("input: " + input[1]);
+  
 
       for (var i = 0; i < input.length; ++i) {
         var ltln = L.latLng(input[i][0], input[i][1]);
@@ -86,7 +176,20 @@ export class MapComponent implements AfterViewInit {
         latlngArray.push(ltln);
       }
 
-         innerRoute[index] = L.Routing.control({
+
+     /* this.map.addControl(L.Routing.control({
+        waypoints: [...latlngArray],
+        lineOptions: {
+          styles: [{ color: index === 0 ? '#5733ff' : '#ff5733', opacity: 1, weight: 3 }],
+          extendToWaypoints: true,
+          missingRouteTolerance: 10
+        },
+        router: L.Routing.osrmv1({
+          serviceUrl: "http://localhost:5000/route/v1",
+        })
+      }))*/
+
+         this.innerRoute[index] = L.Routing.control({
           waypoints: [...latlngArray],
           lineOptions: {
             styles: [{ color: index === 0 ? '#5733ff' : '#ff5733', opacity: 1, weight: 3 }],
@@ -98,7 +201,7 @@ export class MapComponent implements AfterViewInit {
           })
         }).addTo(this.map);
 
-      const routingControlContainer = innerRoute[index].getContainer();
+      const routingControlContainer = this.innerRoute[index].getContainer();
       const controlContainerParent = routingControlContainer?.parentNode;
       if (controlContainerParent && routingControlContainer) {
         controlContainerParent.removeChild(routingControlContainer);

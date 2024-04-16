@@ -17,30 +17,40 @@
     height: 100%;
     background-color: #ffffff;
     overflow-y: auto;
-    padding: 2rem;
+    padding: 0 2rem;
     box-sizing: border-box;
     user-select: none;
   }
   
 .sidebar .fixedHeader{
-  position: fixed;
+ /* 
   background-color: #ffffff;
   height: 5.5rem;
   margin-bottom: -2rem;
   margin-top: -2rem;
   margin-left: -2rem;
   width: inherit;
+  */
+  position: fixed;
   z-index: 5;
+  //margin-top: 1rem;
+  width:inherit;
+  padding-right: 5rem;
+  height: 10rem;
+  background-color: #fff;
 }
 
+.sidebar .fixedHeader select{
+  margin-right: 5rem;
+}
 
 .sidebar .fixedHeader h2{
   text-transform: uppercase;
   font-weight: bolder;
   font-stretch: expanded;
   padding: 0;
-  margin-bottom: -2rem;
-  margin-top: 2rem;
+ // margin-bottom: -2rem;
+  //margin-top: 2rem;
   margin-left: 2rem;
   //position: fixed;
   width: 100% !important;
@@ -84,8 +94,8 @@
 
 /// Sidebar
 
-.vehicle-label:hover {
-  background-color: #f0f0f0;
+.sidebar > ul{
+  margin-top: 10rem;
 }
 
 .vehicle-radio {
@@ -141,18 +151,30 @@
 .vehicle-label-outter {
   display: flex;
   align-items: center;
-  padding: 1.6rem 0rem 1.6rem 0rem;
   cursor: pointer;
   transition: background-color 0.6s ease;
-  border-bottom: solid #ECECEC;
   flex-wrap: wrap;
+  border-bottom: #ECECEC solid;
 }
 
-.vehicle-label-outter:hover {
+.vehicle-highlight{
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.6s ease;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 1.6rem 0 1.6rem 0;
+}
+
+.vehicle-highlight:hover {
   background-color: #D3D3D3 !important;
 }
 
-.vehicle-label.selected .vehicle-icon{
+
+
+
+.vehicle-highlight.selected .vehicle-icon{
   background-color:  #277FC9;
 }
 
@@ -208,6 +230,8 @@
 .vehicle-icon img {
   width: 100%;
   opacity: 1;
+  max-width: 3.6rem;
+  max-height: 3.6rem;
 }
 
 .vehicle-details {
@@ -243,16 +267,17 @@
 }
 
 .person-icon {
-  width: aut;
+  width: auto;
   height: 100%;
   min-height: 3.6rem;
   min-width: 3.6rem;
-  padding: 1.2rem;
+  padding: 2rem 1.2rem 1.2rem 1.2rem;
   border-radius: 1.6rem;
   border: solid 0.3rem #E9e9e9;
   background-color: #F1F1F1;
   display: flex;
   align-items: center;
+  margin: 0 2rem 0 2rem;
 }
 
 .person-label {
@@ -260,14 +285,33 @@
   align-items: center;
   cursor: pointer;
   padding: 1.2rem 0;
+  padding: 1rem 0rem 1rem 0rem;
+  width: 100% !important;
+}
+
+.vehicle-label-outter .person-label:hover{
+  background-color: #D3D3D3;
+}
+
+.people-list{
+  width: 100% !important;
+  background-color: #ffffff;
+  margin-bottom: -1.6rem;
 }
 
 .person-checkbox {
-  display: none; 
+  padding: 0 1rem 0 1rem;
+  margin: 0 1.5rem 0 1.5rem;
 }
 
-.person-checkbox + .person-icon {
-  margin-right: 10px;
+.person-checkbox[type=checkbox]
+{
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(1.5); /* IE */
+  -moz-transform: scale(1.5); /* FF */
+  -webkit-transform: scale(1.5); /* Safari and Chrome */
+  -o-transform: scale(1.5); /* Opera */
+  transform: scale(1.5);
 }
 
 .person-checkbox:checked + .person-icon img {
@@ -301,11 +345,182 @@
   font-size: 1.6rem; 
   font-weight: bold;
   color: #333;
-  margin-bottom: 5px;
 }
 
-.person-company,
+.person-company{
+  font-weight: 900;
+  font-size: 1.2rem;
+  color: #999;
+}
+
 .person-coordinates {
   font-size: 1.2rem;
   color: #999;
+}
+
+
+/* styles.css or your component's CSS file */
+
+/* Style the select box */
+.custom-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f8f8f8;
+  cursor: pointer;
+}
+
+/* Style the select box when clicked */
+.custom-select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+/* Style the options in the select box */
+.custom-select option {
+  padding: 0.8rem;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+
+/* Inline the select box with the header */
+.fixedHeader {
+  display: flex;
+  align-items: center;
+}
+
+// Button
+.submit{
+  position: absolute;
+  bottom: 5rem;
+  right: 7.5rem;
+  z-index: 20000;
+}
+
+.hide{
+  display: none;
+}
+
+.submit .btn.btn-primary{
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+
+  font-size: 2rem;
+  font-weight: 600;
+  color: #333;
+
+  display: inline-block;
+  font-size: 2em;
+  padding: 1em 2em;
+  margin-top: 10rem;
+  margin-bottom: 6rem;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #f1f1f1;
+  color: #333333;
+  border-radius: 1rem;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: transform ease-in 0.1s, box-shadow ease-in 0.25s;
+  box-shadow: 0 2px 25px rgba(255, 255, 255, 0.5);
+  
+  &:focus {
+    outline: 0;
+  }
+  
+  &:before, &:after{
+    position: absolute;
+    content: '';
+    display: block;
+    width: 140%;
+    height: 100%;
+    left: -20%;
+    z-index: -1000;
+    transition: all ease-in-out 0.5s;
+    background-repeat: no-repeat;
+  }
+  
+  &:before{
+    display: none;
+    top: -75%;
+    background-image:  
+      radial-gradient(circle, #f1f1f1 20%, transparent 20%),
+    radial-gradient(circle,  transparent 20%, #f1f1f1 20%, transparent 30%),
+    radial-gradient(circle, #f1f1f1 20%, transparent 20%), 
+    radial-gradient(circle, #f1f1f1 20%, transparent 20%),
+    radial-gradient(circle,  transparent 10%, #f1f1f1 15%, transparent 20%),
+    radial-gradient(circle, #f1f1f1 20%, transparent 20%),
+    radial-gradient(circle, #f1f1f1 20%, transparent 20%),
+    radial-gradient(circle, #f1f1f1 20%, transparent 20%),
+    radial-gradient(circle, #f1f1f1 20%, transparent 20%);
+  background-size: 10% 10%, 20% 20%, 15% 15%, 20% 20%, 18% 18%, 10% 10%, 15% 15%, 10% 10%, 18% 18%;
+  //background-position: 0% 80%, -5% 20%, 10% 40%, 20% 0%, 30% 30%, 22% 50%, 50% 50%, 65% 20%, 85% 30%;
+  }
+  
+  &:after{
+    display: none;
+    bottom: -75%;
+    background-image:  
+    radial-gradient(circle, #f1f1f1 20%, transparent 20%), 
+    radial-gradient(circle, #f1f1f1 20%, transparent 20%),
+    radial-gradient(circle,  transparent 10%, #f1f1f1 15%, transparent 20%),
+    radial-gradient(circle, #f1f1f1 20%, transparent 20%),
+    radial-gradient(circle, #f1f1f1 20%, transparent 20%),
+    radial-gradient(circle, #f1f1f1 20%, transparent 20%),
+    radial-gradient(circle, #f1f1f1 20%, transparent 20%);
+  background-size: 15% 15%, 20% 20%, 18% 18%, 20% 20%, 15% 15%, 10% 10%, 20% 20%;
+  //background-position: 5% 90%, 10% 90%, 10% 90%, 15% 90%, 25% 90%, 25% 90%, 40% 90%, 55% 90%, 70% 90%;
+  }
+ 
+  &:active{
+    transform: scale(0.9);
+    background-color: darken(#f1f1f1, 5%);
+    box-shadow: 0 2px 25px rgba(120, 120, 120, 0.2);
+  }
+  
+  &.animate{
+    &:before{
+      display: block;
+      animation: topBubbles ease-in-out 0.75s forwards;
+    }
+    &:after{
+      display: block;
+      animation: bottomBubbles ease-in-out 0.75s forwards;
+    }
+  }
+}
+
+
+@keyframes topBubbles {
+  0%{
+    background-position: 5% 90%, 10% 90%, 10% 90%, 15% 90%, 25% 90%, 25% 90%, 40% 90%, 55% 90%, 70% 90%;
+  }
+    50% {
+      background-position: 0% 80%, 0% 20%, 10% 40%, 20% 0%, 30% 30%, 22% 50%, 50% 50%, 65% 20%, 90% 30%;}
+ 100% {
+    background-position: 0% 70%, 0% 10%, 10% 30%, 20% -10%, 30% 20%, 22% 40%, 50% 40%, 65% 10%, 90% 20%;
+  background-size: 0% 0%, 0% 0%,  0% 0%,  0% 0%,  0% 0%,  0% 0%;
+  }
+}
+
+@keyframes bottomBubbles {
+  0%{
+    background-position: 10% -10%, 30% 10%, 55% -10%, 70% -10%, 85% -10%, 70% -10%, 70% 0%;
+  }
+  50% {
+    background-position: 0% 80%, 20% 80%, 45% 60%, 60% 100%, 75% 70%, 95% 60%, 105% 0%;}
+ 100% {
+    background-position: 0% 90%, 20% 90%, 45% 70%, 60% 110%, 75% 80%, 95% 70%, 110% 10%;
+  background-size: 0% 0%, 0% 0%,  0% 0%,  0% 0%,  0% 0%,  0% 0%;
+  }
 }

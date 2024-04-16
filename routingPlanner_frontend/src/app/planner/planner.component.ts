@@ -1,15 +1,17 @@
 import { Component, OnInit, ElementRef } from '@angular/core';
 import { MapComponent } from '../map/map.component';
-import { NgModel, NgForm } from '@angular/forms';
+import { NgModel, NgForm, FormsModule } from '@angular/forms';
 import { MapModule } from '../map/map.module';
 import { CommonModule } from '@angular/common';
 import { NgFor, NgIf } from '@angular/common';
+import { map } from 'leaflet';
+import { publishFacade } from '@angular/compiler';
 //import { vehicleService } from '../services/vehicle.service';
 
 @Component({
   selector: 'app-planner',
   standalone: true,
-  imports: [MapModule, NgFor, NgIf],
+  imports: [MapModule, NgFor, NgIf, FormsModule],
   templateUrl: './planner.component.html',
   styleUrl: './planner.component.scss'
 })
@@ -19,7 +21,15 @@ export class PlannerComponent {
     { Id: 2, CompanyName: 'Starlight Rides', VehicleDescription: 'Celestial Cruiser', coordinates: { x: 48.2082, y: 16.3719 }, canTransportWheelchairs: false, seatingPlaces: 4 },
     { Id: 3, CompanyName: 'ZoomZoom Logistics', VehicleDescription: 'Flashmobile XL', coordinates: { x: 47.316917, y: 15.421834 }, canTransportWheelchairs: true, seatingPlaces: 6 },
     { Id: 4, CompanyName: 'Galactic Motors', VehicleDescription: 'AstroVan', coordinates: { x: 47.207603, y: 15.724283 }, canTransportWheelchairs: false, seatingPlaces: 8 },
-    { Id: 5, CompanyName: 'Phoenix Transports', VehicleDescription: 'Firebird Express', coordinates: { x: 47.5316, y: 14.6625 }, canTransportWheelchairs: true, seatingPlaces: 5 }
+    { Id: 5, CompanyName: 'Phoenix Transports', VehicleDescription: 'Firebird Express', coordinates: { x: 47.5316, y: 14.6625 }, canTransportWheelchairs: true, seatingPlaces: 5 },
+    { Id: 6, CompanyName: 'Phoenix Transports', VehicleDescription: 'Firebird Easy', coordinates: { x: 47.3316, y: 14.4625 }, canTransportWheelchairs: false, seatingPlaces: 8 },
+    { Id: 7, CompanyName: 'Speedy Transport', VehicleDescription: 'Thunderbolt 5000', coordinates: { x: 47.6097, y: 13.0419 }, canTransportWheelchairs: true, seatingPlaces: 5 },
+    { Id: 8, CompanyName: 'Starlight Rides', VehicleDescription: 'Celestial Cruiser', coordinates: { x: 48.2082, y: 16.3719 }, canTransportWheelchairs: false, seatingPlaces: 4 },
+    { Id: 9, CompanyName: 'ZoomZoom Logistics', VehicleDescription: 'Flashmobile XL', coordinates: { x: 47.316917, y: 15.421834 }, canTransportWheelchairs: true, seatingPlaces: 6 },
+    { Id: 10, CompanyName: 'Galactic Motors', VehicleDescription: 'AstroVan', coordinates: { x: 47.207603, y: 15.724283 }, canTransportWheelchairs: false, seatingPlaces: 8 },
+    { Id: 11, CompanyName: 'Phoenix Transports', VehicleDescription: 'Firebird Express', coordinates: { x: 47.5316, y: 14.6625 }, canTransportWheelchairs: true, seatingPlaces: 5 },
+    { Id: 12, CompanyName: 'Phoenix Transports', VehicleDescription: 'Firebird Easy', coordinates: { x: 47.3316, y: 14.4625 }, canTransportWheelchairs: false, seatingPlaces: 8 }
+
   ];
 
   
@@ -44,10 +54,26 @@ export class PlannerComponent {
 
 
   selectedVehicle: any;
-   //vehicleLocations: any[]; 
+  person_selection: any;
+
+  //Filter
+  selectedCompany: any;
+  companies: any[] = [];
+  filteredVehicles: any[] = [];
+
 
   constructor(/*private vehicleService: vehicleService*/private elementRef: ElementRef) {
-   }
+
+    //this.companies = 
+    this.vehicles.forEach(vehicle => {
+      if(!this.companies.includes(vehicle.CompanyName)){
+      this.companies.push(vehicle.CompanyName);
+      }
+    });
+
+    console.dir(this.companies);
+
+  }
 
    /*onVehicleSelected(vehicle: any) {
     this.selectedVehicle = vehicle; // Set the selected vehicle
@@ -61,36 +87,71 @@ export class PlannerComponent {
     
     const id: string = 'vehicle-' + vehicle.Id;
 
-    console.log(id);
+    //console.log(id);
     //const selectElement: HTMLInputElement = this.elementRef.nativeElement.querySelector('.' + id);
     const checkbox: HTMLInputElement = this.elementRef.nativeElement.querySelector('#checkbox-' + id);
     const vehicleLabels = document.querySelectorAll('.vehicle-label');
     const selectElement = document.querySelectorAll('.' + id);    
+    const submitButton = document.querySelectorAll('.submit');    
 
     if (!checkbox.checked) {
         checkbox.checked = true;
-        vehicleLabels.forEach(function (label) {label.classList.remove('selected'); label.parentElement?.classList.add('shrunk');});
-        selectElement[0].classList.add('selected');
-        selectElement[0].parentElement?.classList.remove('shrunk');
+        vehicleLabels.forEach(function (label) {label.parentElement?.classList.remove('selected'); label.parentElement?.parentElement?.classList.add('shrunk');});
+        selectElement[0].parentElement?.classList.add('selected');
+        selectElement[0].parentElement?.parentElement?.classList.remove('shrunk');
+        submitButton[0].classList.remove('hide');
         this.selectedVehicle = vehicle;
 
-        vehicleLabels.forEach(function (label) {
-          if(!label.classList.contains('selected')){
-            console.log(label);
+        /*vehicleLabels.forEach(function (label) {
+          if(!label.parentElement?.classList.contains('selected')){
+            //console.log(label);
           }
-        });
+        });*/
     }else{
         selectElement[0].classList.remove('selected');
         checkbox.checked = false;
         this.selectedVehicle = null;
-        vehicleLabels.forEach(function (label) { label.parentElement?.classList.remove('shrunk');});
+        submitButton[0].classList.add('hide');
+        vehicleLabels.forEach(function (label) { label.parentElement?.parentElement?.classList.remove('shrunk');});
     }
 }
 
+onCompanySelected(){
+  this.selectedVehicle = null;
+}
 
 getPeopleByCompany(companyName: string) {
   return this.people.filter(person => person.company === companyName);
 }
+
+
+getMapCoordinates(): [any[], boolean] {
+ 
+  const value = true;
+  if (this.selectedVehicle == null) {
+    //console.log("Nothing sekected!");
+    return [this.people.map(person => [person.startCoordinate.x, person.startCoordinate.y]), true];
+  } else {
+    return [this.vehicles.map(vehicle => [vehicle.coordinates.x, vehicle.coordinates.y]), false];
+  }
+
+  return [[], true];
+}
+
+private isEqual(obj1: any, obj2: any): boolean {return JSON.stringify(obj1) === JSON.stringify(obj2);}
+
+getFilteredVehicles(): any[] {
+  if (!this.selectedCompany) {
+      return this.vehicles;
+  } else {
+      return this.vehicles.filter(vehicle => vehicle.CompanyName === this.selectedCompany);
+  }
+}
+
+submitSelectedRoute(){
+    // Submit route
+}
+
 
 }
   /*

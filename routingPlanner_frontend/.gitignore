@@ -42,4 +42,4 @@ testem.log
 Thumbs.db
 
 #OSMR
-PR_DKE_VehicleRouting/osmr-backend/
+osmr-backend/
