@@ -39,16 +39,17 @@
                         <div class="seatNR">1</div>
                         <img src="../../assets/wheelchair-solid.svg" alt="Wheelchair Accessible">
                     </div>
-            </div>
+                </div>
               </div>
             </div>
           
               <div class="people-list" *ngIf="selectedVehicle">
                 <h3>{{ selectedVehicle.CompanyName }} Employees:</h3>
-                <ul>
-                    <li *ngFor="let person of getPeopleByCompany(selectedVehicle.CompanyName)">
+                <ul id="vehicle-peopleList-{{ vehicle.Id }}">
+                    
+                  <!--
+                  <li *ngFor="let person of getPeopleByCompany(selectedVehicle.CompanyName)">
                         <label class="person-label">
-                        <!--<input type="checkbox" class="person-checkbox">-->
                         <div class="person-icon">
                             <img src="../../assets/user-solid.svg" alt="Person Icon">
                         </div>
@@ -63,6 +64,8 @@
                         </div>
                     </label>
                     </li>
+
+                  -->
                 </ul>
             </div>
 

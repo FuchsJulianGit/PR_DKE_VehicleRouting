@@ -17,15 +17,17 @@ export class MapComponent implements AfterViewInit, OnChanges {
 //  @Input() mapCoordinatesInput: any[] = [];
 
   @Input() inputValue: [any[], boolean] = [[], false];
+
+  
   public mapCoordinatesInput: any[] = [];
   public inputType: boolean = false;
 //mapCoordinatesInput
 
   public routesData = [
-    { routeName: "Route 1", sequenceNumber: 1, coordinates: [47.6097, 13.0419] },
-    { routeName: "Route 1", sequenceNumber: 2, coordinates: [47.507603, 15.724283] },
-    { routeName: "Route 2", sequenceNumber: 1, coordinates: [47.316917, 15.421834] },
-    { routeName: "Route 2", sequenceNumber: 2, coordinates: [47.207603, 15.724283] }
+    { routeName: "Route 1", id:1, sequenceNumber: 1, coordinates: [47.6097, 13.0419] },
+    { routeName: "Route 1", id:1, sequenceNumber: 2, coordinates: [47.507603, 15.724283] },
+    { routeName: "Route 2", id:1, sequenceNumber: 1, coordinates: [47.316917, 15.421834] },
+    { routeName: "Route 2", id:1, sequenceNumber: 2, coordinates: [47.207603, 15.724283] }
   ];
   
   public mapCoordinates: any[] = [];
@@ -69,6 +71,9 @@ export class MapComponent implements AfterViewInit, OnChanges {
       if(this.mapCoordinatesInput != undefined && this.mapInitialized == true){
         if( JSON.stringify(this.mapCoordinates) !==  JSON.stringify(this.mapCoordinatesInput)){
           this.mapCoordinates = this.mapCoordinatesInput;
+
+          this.routesData = mapCoordinatesInput;
+
           this.initializeRouting();
         }}
     }
@@ -159,7 +164,13 @@ private isMarkerDrawn(markerCoord: any): boolean {
 
   private initializeRouting() {
     this.resetMap();
+
+    console.log(this.routesData);
+
     const groupedRoutes = this.groupRoutesByRouteName(this.routesData);
+
+    console.log(groupedRoutes);
+
 
     Object.values(groupedRoutes).forEach((routes: any[], index) => {
 
@@ -168,7 +179,8 @@ private isMarkerDrawn(markerCoord: any): boolean {
       var input = this.getPoints(routes);
   
 
-      for (var i = 0; i < input.length; ++i) {
+      for (var i = 0; i < input.length; i++) {
+        console.log(input[i]);
         var ltln = L.latLng(input[i][0], input[i][1]);
         L.circleMarker(ltln, {
           radius: 2
@@ -189,10 +201,14 @@ private isMarkerDrawn(markerCoord: any): boolean {
         })
       }))*/
 
+console.log(routes);
+console.log( this.innerRoute);
+
+
          this.innerRoute[index] = L.Routing.control({
           waypoints: [...latlngArray],
           lineOptions: {
-            styles: [{ color: index === 0 ? '#5733ff' : '#ff5733', opacity: 1, weight: 3 }],
+            styles: [{ color: (routes[0].mainRoute ? '#5733ff' : '#888888'), opacity: 1, weight: 3 }],
             extendToWaypoints: true,
             missingRouteTolerance: 10
           },

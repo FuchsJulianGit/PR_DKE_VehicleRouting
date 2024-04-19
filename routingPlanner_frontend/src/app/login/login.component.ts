@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 
 
@@ -12,10 +12,18 @@ import * as L from 'leaflet';
   styleUrl: './login.component.scss'
 })
 
-export class LoginComponent {
+
+
+export class LoginComponent implements OnInit{
   login() {
-    // Implement your login logic here
     console.log('Login button clicked');
+  }
+
+  constructor() { }
+
+  ngOnInit(): void {
+
+
   }
 
 }
