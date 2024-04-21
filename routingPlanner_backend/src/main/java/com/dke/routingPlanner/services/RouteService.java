@@ -35,11 +35,12 @@ public class RouteService {
     }
 
     public RoutePoint updateRoutePoint(RoutePoint routePoint) {
-        RoutePoint existingRoutePoint= repository.findById(routePoint.getId()).orElse(null);
+        /*RoutePoint existingRoutePoint= repository.findById(routePoint.getId()).orElse(null);
         existingRoutePoint.setSeq(routePoint.getSeq());
         existingRoutePoint.setStartPoint(routePoint.getStartPoint());
         existingRoutePoint.setPerson(routePoint.getPerson());
-        return repository.save(existingRoutePoint);
+        return repository.save(existingRoutePoint);*/
+        return repository.save(routePoint);
     }
 
     public Iterable<RoutePoint> getAllRoutePoints() {

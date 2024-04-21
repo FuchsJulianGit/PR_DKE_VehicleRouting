@@ -6,10 +6,15 @@ import { CommonModule } from '@angular/common';
 import { NgFor, NgIf } from '@angular/common';
 import { map } from 'leaflet';
 import { publishFacade } from '@angular/compiler';
-//import { vehicleService } from '../services/vehicle.service';
+import { RoutePointService } from '../route-point-list/route-point-service.service';
+import { VehicleService } from '../vehicle/vehicle.service';
+import { PersonService } from '../person/person.service';
 
+
+import { RoutePoint, Person, Vehicle } from '../Interfaces/route-point'
 import Openrouteservice from 'openrouteservice-js';
 import { routes } from '../app.routes';
+import { Observable, of } from 'rxjs';
 let orsDirections = new Openrouteservice.Directions({ api_key: "XYZ"});
 
 
@@ -19,8 +24,8 @@ interface Coordinate {
   y: number;
 }
 
-interface Vehicle {
-  Id: number;
+interface VehicleLocal {
+  id: number;
   CompanyName: string;
   coordinates: Coordinate;
   canTransportWheelchairs: boolean;
@@ -28,7 +33,7 @@ interface Vehicle {
   seatingPlaces: number;
 }
 
-interface Person {
+interface PersonLocal {
   id: number;
   name: string;
   startCoordinate: Coordinate;
@@ -41,36 +46,42 @@ interface Route {
   vehicle_id: number;
   start_location: number[];
   end_location: number[];
-  people: Person[];
+  people: PersonLocal[];
 }
 
 interface RouteFormat {
-  routeName: string;
+  routeName: string,
   id: number, 
   sequenceNumber: number,
   coordinates: number[],
   mainRoute: boolean
 };
 
-
-
-
-
+interface Route_DB{
+  id: number,
+  Description: String,
+  Sequenz: number,
+  AtHome: boolean,
+  Coordinates: number[],
+  Vehicle: number
+}
+        
 @Component({
   selector: 'app-planner',
   standalone: true,
-  imports: [MapModule, NgFor, NgIf, FormsModule],
+  imports: [MapModule, NgFor, NgIf, FormsModule, CommonModule],
   templateUrl: './planner.component.html',
-  styleUrl: './planner.component.scss'
+  styleUrl: './planner.component.scss',
+  providers: [RoutePointService]
 })
 
 
 export class PlannerComponent {
-  vehicles: any[] = [
-    { Id: 1, CompanyName: 'Speedy Transport', VehicleDescription: 'Thunderbolt 5000', coordinates: { x: 47.6097, y: 13.0419 }, canTransportWheelchairs: true, seatingPlaces: 5 },
-   /* { Id: 2, CompanyName: 'Starlight Rides', VehicleDescription: 'Celestial Cruiser', coordinates: { x: 48.2082, y: 16.3719 }, canTransportWheelchairs: false, seatingPlaces: 4 },*/
+  public vehicles: any[] = [
+  /*  { Id: 1, CompanyName: 'Speedy Transport', VehicleDescription: 'Thunderbolt 5000', coordinates: { x: 47.6097, y: 13.0419 }, canTransportWheelchairs: true, seatingPlaces: 5 },
+    { Id: 2, CompanyName: 'Starlight Rides', VehicleDescription: 'Celestial Cruiser', coordinates: { x: 48.2082, y: 16.3719 }, canTransportWheelchairs: false, seatingPlaces: 4 },
     { Id: 3, CompanyName: 'Starlight Rides', VehicleDescription: 'Flashmobile XL', coordinates: { x: 47.316917, y: 15.421834 }, canTransportWheelchairs: true, seatingPlaces: 6 },
-    /*{ Id: 4, CompanyName: 'Galactic Motors', VehicleDescription: 'AstroVan', coordinates: { x: 47.207603, y: 15.724283 }, canTransportWheelchairs: false, seatingPlaces: 8 },
+    { Id: 4, CompanyName: 'Galactic Motors', VehicleDescription: 'AstroVan', coordinates: { x: 47.207603, y: 15.724283 }, canTransportWheelchairs: false, seatingPlaces: 8 },
     { Id: 5, CompanyName: 'Phoenix Transports', VehicleDescription: 'Firebird Express', coordinates: { x: 47.5316, y: 14.6625 }, canTransportWheelchairs: true, seatingPlaces: 5 },
     { Id: 6, CompanyName: 'Phoenix Transports', VehicleDescription: 'Firebird Easy', coordinates: { x: 47.3316, y: 14.4625 }, canTransportWheelchairs: false, seatingPlaces: 8 },
     { Id: 7, CompanyName: 'Speedy Transport', VehicleDescription: 'Thunderbolt 5000', coordinates: { x: 47.6097, y: 13.0419 }, canTransportWheelchairs: true, seatingPlaces: 5 },
@@ -79,34 +90,38 @@ export class PlannerComponent {
     { Id: 10, CompanyName: 'Galactic Motors', VehicleDescription: 'AstroVan', coordinates: { x: 47.207603, y: 15.724283 }, canTransportWheelchairs: false, seatingPlaces: 8 },
     { Id: 11, CompanyName: 'Phoenix Transports', VehicleDescription: 'Firebird Express', coordinates: { x: 47.5316, y: 14.6625 }, canTransportWheelchairs: true, seatingPlaces: 5 },
     { Id: 12, CompanyName: 'Phoenix Transports', VehicleDescription: 'Firebird Easy', coordinates: { x: 47.3316, y: 14.4625 }, canTransportWheelchairs: false, seatingPlaces: 8 }*/
-
   ];
-
-
   // Get this data from Database
   peopleDatabase: any[] = [
-    { id: 1, name: 'John Doe', startCoordinate: { x: 47.60950, y: 13.04160 }, endCoordinate: { x: 47.6098, y: 13.0422 }, company: 'Speedy Transport', needsWheelchair: true },
+ /*  { id: 1, name: 'John Doe', startCoordinate: { x: 47.60950, y: 13.04160 }, endCoordinate: { x: 47.6098, y: 13.0422 }, company: 'Speedy Transport', needsWheelchair: true },
     { id: 2, name: 'Jane Smith', startCoordinate: { x: 47.60990, y: 13.04130 }, endCoordinate: { x: 47.6096, y: 13.0418 }, company: 'Speedy Transport', needsWheelchair: false },
     { id: 3, name: 'Alice Johnson', startCoordinate: { x: 47.60940, y: 13.04180 }, endCoordinate: { x: 47.6097, y: 13.0415 }, company: 'Speedy Transport', needsWheelchair: false  },
     { id: 4, name: 'Bob Brown', startCoordinate: { x: 48.20800, y: 16.37170 }, endCoordinate: { x: 48.2083, y: 16.3723 }, company: 'Starlight Rides', needsWheelchair: true },
     { id: 5, name: 'Eve White', startCoordinate: { x: 48.20850, y: 16.37140 }, endCoordinate: { x: 48.3082, y: 16.3719 }, company: 'Starlight Rides', needsWheelchair: false  },
-    { id: 6, name: 'Bob Brown', startCoordinate: { x: 48.20800, y: 16.37170 }, endCoordinate: { x: 48.2583, y: 16.3720 }, company: 'Starlight Rides', needsWheelchair: false  },
-    { id: 7, name: 'Eve White', startCoordinate: { x: 48.20850, y: 16.37140 }, endCoordinate: { x: 48.3062, y: 16.3709 }, company: 'Starlight Rides', needsWheelchair: false  },
+    { id: 6, name: 'Bob Brown', startCoordinate: { x: 48.20800, y: 16.37170 }, endCoordinate: { x: 48.2583, y: 16.3720 }, company: 'Galactic Motors', needsWheelchair: false  },
+    { id: 7, name: 'Eve White', startCoordinate: { x: 48.20850, y: 16.37140 }, endCoordinate: { x: 48.3062, y: 16.3709 }, company: 'Galactic Motors', needsWheelchair: false  },*/
   ]
 
   people: any[] = [
-    { id: 1, name: 'John Doe', startCoordinate: { x: 47.60950, y: 13.04160 }, endCoordinate: { x: 47.6098, y: 13.0422 }, company: 'Speedy Transport', needsWheelchair: true },
+    /*{ id: 1, name: 'John Doe', startCoordinate: { x: 47.60950, y: 13.04160 }, endCoordinate: { x: 47.6098, y: 13.0422 }, company: 'Speedy Transport', needsWheelchair: true },
     { id: 2, name: 'Jane Smith', startCoordinate: { x: 47.60990, y: 13.04130 }, endCoordinate: { x: 47.6096, y: 13.0418 }, company: 'Speedy Transport', needsWheelchair: false },
     { id: 3, name: 'Alice Johnson', startCoordinate: { x: 47.60940, y: 13.04180 }, endCoordinate: { x: 47.6097, y: 13.0415 }, company: 'Speedy Transport', needsWheelchair: false  },
     { id: 4, name: 'Bob Brown', startCoordinate: { x: 48.20800, y: 16.37170 }, endCoordinate: { x: 48.2083, y: 16.3723 }, company: 'Starlight Rides', needsWheelchair: true },
     { id: 5, name: 'Eve White', startCoordinate: { x: 48.20850, y: 16.37140 }, endCoordinate: { x: 48.3082, y: 16.3719 }, company: 'Starlight Rides', needsWheelchair: false  },
     { id: 6, name: 'Bob Brown', startCoordinate: { x: 48.20800, y: 16.37170 }, endCoordinate: { x: 48.2583, y: 16.3720 }, company: 'Starlight Rides', needsWheelchair: false  },
     { id: 7, name: 'Eve White', startCoordinate: { x: 48.20850, y: 16.37140 }, endCoordinate: { x: 48.3062, y: 16.3709 }, company: 'Starlight Rides', needsWheelchair: false  },
-  ]
+    { id: 8, name: 'David Wilson', startCoordinate: { x: 47.3170, y: 15.4212 }, endCoordinate: { x: 47.3167, y: 15.4217 }, company: 'ZoomZoom Logistics' },
+    { id: 9, name: 'Sophia Anderson', startCoordinate: { x: 47.3165, y: 15.4217 }, endCoordinate: { x: 47.3168, y: 15.4214 }, company: 'ZoomZoom Logistics' },
+    { id: 10, name: 'James Clark', startCoordinate: { x: 47.2073, y: 15.7238 }, endCoordinate: { x: 47.2076, y: 15.7244 }, company: 'Galactic Motors' },
+    { id: 11, name: 'Olivia Martinez', startCoordinate: { x: 47.2078, y: 15.7235 }, endCoordinate: { x: 47.2075, y: 15.7240 }, company: 'Galactic Motors' },
+    { id: 12, name: 'William Lee', startCoordinate: { x: 47.2071, y: 15.7240 }, endCoordinate: { x: 47.2074, y: 15.7237 }, company: 'Galactic Motors' },
+    { id: 13, name: 'Sophie Brown', startCoordinate: { x: 47.5313, y: 14.6623 }, endCoordinate: { x: 47.5316, y: 14.6629 }, company: 'Phoenix Transports' },
+    { id: 14, name: 'Alexander Johnson', startCoordinate: { x: 47.5318, y: 14.6620 }, endCoordinate: { x: 47.5315, y: 14.6625 }, company: 'Phoenix Transports' },
+    { id: 15, name: 'Charlotte Smith', startCoordinate: { x: 47.5311, y: 14.6625 }, endCoordinate: { x: 47.5314, y: 14.6622 }, company: 'Phoenix Transports' }*/
+];
 
-  
-  /* people: any[] = [
-    { id: 1, name: 'John Doe', startCoordinate: { x: 47.6095, y: 13.0416 }, endCoordinate: { x: 47.6098, y: 13.0422 }, company: 'Speedy Transport' },
+   /*   people: any[] = [
+ { id: 1, name: 'John Doe', startCoordinate: { x: 47.6095, y: 13.0416 }, endCoordinate: { x: 47.6098, y: 13.0422 }, company: 'Speedy Transport' },
     { id: 2, name: 'Jane Smith', startCoordinate: { x: 47.6099, y: 13.0413 }, endCoordinate: { x: 47.6096, y: 13.0418 }, company: 'Speedy Transport' },
     { id: 3, name: 'Alice Johnson', startCoordinate: { x: 47.6094, y: 13.0418 }, endCoordinate: { x: 47.6097, y: 13.0415 }, company: 'Speedy Transport' },
     { id: 4, name: 'Bob Brown', startCoordinate: { x: 48.2080, y: 16.3717 }, endCoordinate: { x: 48.2083, y: 16.3723 }, company: 'Starlight Rides' },
@@ -123,8 +138,6 @@ export class PlannerComponent {
     { id: 15, name: 'Charlotte Smith', startCoordinate: { x: 47.5311, y: 14.6625 }, endCoordinate: { x: 47.5314, y: 14.6622 }, company: 'Phoenix Transports' }
 ];*/
 
-
-
   selectedVehicle: any;
   person_selection: any;
   selectedRoute: any;
@@ -133,19 +146,12 @@ export class PlannerComponent {
   companies: any[] = [];
   filteredVehicles: any[] = [];  
   formattedRoutesArray: any[] = [];
+  data!: Observable<any>;
 
-
-  constructor(/*private vehicleService: vehicleService*/private elementRef: ElementRef) {
-
+  constructor(/*private vehicleService: vehicleService*/private elementRef: ElementRef, public routePointService: RoutePointService, private personService: PersonService, private vehicleService:  VehicleService) {
     //this.companies = 
-    this.vehicles.forEach(vehicle => {
-      if(!this.companies.includes(vehicle.CompanyName)){
-      this.companies.push(vehicle.CompanyName);
-      }
-    });
 
     //console.dir(this.companies);
-
   }
 
    /*onVehicleSelected(vehicle: any) {
@@ -154,11 +160,14 @@ export class PlannerComponent {
 
 
   
+
+  
   selectCheckbox(vehicle: any, event: Event) {
+
     event.preventDefault();
     this.selectedVehicle = null;
     
-    const id: string = 'vehicle-' + vehicle.Id;
+    const id: string = 'vehicle-' + vehicle.id;
 
     //console.log(id);
     //const selectElement: HTMLInputElement = this.elementRef.nativeElement.querySelector('.' + id);
@@ -167,15 +176,20 @@ export class PlannerComponent {
     const selectElement = document.querySelectorAll('.' + id);    
     const submitButton = document.querySelectorAll('.submit');    
 
+   // document.getElementById('vehicle-peopleList-' + vehicle.id)?.classList.toggle('.hide');
+
     this.selectedCompany = vehicle.companyName;
 
     if (!checkbox.checked) {
         checkbox.checked = true;
-        vehicleLabels.forEach(function (label) {label.parentElement?.classList.remove('selected'); label.parentElement?.parentElement?.classList.add('shrunk');});
+        vehicleLabels.forEach(function (label) {label.parentElement?.classList.remove('selected'); 
+        label.parentElement?.parentElement?.classList.add('shrunk');});
         selectElement[0].parentElement?.classList.add('selected');
         selectElement[0].parentElement?.parentElement?.classList.remove('shrunk');
         submitButton[0].classList.remove('hide');
         this.selectedVehicle = vehicle;
+
+
 
         this.getCompanyRoute();
 
@@ -190,24 +204,40 @@ export class PlannerComponent {
         this.selectedVehicle = null;
         submitButton[0].classList.add('hide');
         vehicleLabels.forEach(function (label) { label.parentElement?.parentElement?.classList.remove('shrunk');});
-    }
+       
+        document.querySelectorAll('[class*="vehicle-peopleList"]').forEach(element => {
+          element.innerHTML = '';
+      });
+      
+
+      }
 }
 
 onCompanySelected(){
+  
+  const submitButton = document.querySelectorAll('.submit');    
+  submitButton[0].classList.add('hide');
+
+ // console.log(this.selectedVehicle);
+ // console.log(this.selectedCompany);
+
   this.selectedVehicle = null;
+
+  this.createVehicleList(this.selectedCompany);
+
 }
 
 getPeopleByCompany(companyName: string) {
   return this.people.filter(person => person.company === companyName);
 }
 
-
 getMapCoordinates(): [any[], boolean] {
- 
   const value = true;
   if (this.selectedVehicle == null) {
     //console.log("Nothing sekected!");
-    return [this.people.map(person => [person.startCoordinate.x, person.startCoordinate.y]), true];
+     //console.dir(this.vehicles);
+    // console.dir( this.vehicles[0].coordinates.x);
+    return [this.vehicles.map(vehicles => [vehicles.coordinates.x, vehicles.coordinates.y]), true];
   } else {
     return [this.formattedRoutesArray, false];
   }
@@ -216,17 +246,211 @@ getMapCoordinates(): [any[], boolean] {
 }
 
 submitSelectedRoute(){
-  //this.selectedRoute 
+
+  //console.log(this.selectedRoute);
+  var routeSubmit: RoutePoint[] = [];
+/*
+          routeName: routeObj.description,
+          id: (step.type == "start" ||step.type == "end") ? routeObj.vehicle + 10000 : step.id, 
+          sequenceNumber: count,
+          coordinates: [step.location[1], step.location[0]],
+          mainRoute: (this.selectedVehicle.id == routeObj.vehicle) ? true : false*/
+
+  //let peopleList = document.getElementById("vehicle-peopleList-" + this.selectedVehicle.id)?.getElementsByClassName("person-checkbox");
+
+  var peopleList:any = this.getPeopleCheckboxValues("vehicle-peopleList-" + this.selectedVehicle.id);
+
+  var count:number = 0;
+
+  if(this.selectedRoute){
+  for(var step of this.selectedRoute.steps){ 
+    var isHome = false;
+    //  console.log(peopleList);
+    for(var peop of peopleList){
+
+    //  console.log(Number(peop.id) == Number(step.id));
+    //  console.log(Number(peop.id));
+    //  console.log(this.selectedRoute);
+
+
+      if(Number(step.id) >= 10000){
+        isHome = true;
+        break;
+      }
+      if(Number(peop.id) == Number(step.id) || (Number(peop.id) + 1000) == Number(step.id)){
+        isHome = peop.checked;
+        break;
+      }
+    }
+
+    var newRouteVar: RoutePoint = {
+      id: 0,
+      description: this.selectedRoute.description,
+      sequenz: count,
+      atHome: isHome,
+      coordinates: ("[" +step.location[1] + "," + step.location[0] + "]"),
+      vehicle: this.selectedVehicle.id
+    };
+    count++;
+    routeSubmit.push(newRouteVar);
+
+    this.routePointService.save(newRouteVar).subscribe(
+      (response) => {console.log('Route point added successfully:', response);},
+      (error) => { console.error('Error adding route point:', error);}
+    );
+
+  }
+  }
+}
+
+getPeopleCheckboxValues(peopleListId: string): { id: string; checked: boolean }[] {
+  const peopleCheckboxValues: { id: string; checked: boolean }[] = [];
+  const peopleList = document.getElementById(peopleListId);
+  if (peopleList) {
+      const checkboxes = peopleList.getElementsByClassName("person-checkbox");
+      for (let i = 0; i < checkboxes.length; i++) {
+          const checkbox = checkboxes[i] as HTMLInputElement;
+          const id = checkbox.id.replace("checkbox-people-", "");
+          peopleCheckboxValues.push({
+              id: id,
+              checked: checkbox.checked
+          });
+      }
+  }
+
+  return peopleCheckboxValues;
 }
 
 
 private isEqual(obj1: any, obj2: any): boolean {return JSON.stringify(obj1) === JSON.stringify(obj2);}
 
-getFilteredVehicles(): any[] {
-  if (!this.selectedCompany) {
-      return this.vehicles;
+
+private waitForVehicles(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    const interval = setInterval(() => {
+      if (this.vehicles && this.vehicles.length > 0) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 100);
+  });
+}
+
+createVehicleList(companyName?: string){
+  const findPersonById = (id: number) => this.peopleDatabase.find(person => person.id === id);
+  let vehicleList = document.getElementById("vehicle-list");
+  let filteredVehicles = this.vehicles;
+
+  if (companyName) {
+    // Filter vehicles by company name if provided
+    filteredVehicles = this.vehicles.filter(vehicle => vehicle.CompanyName === companyName);
+  }
+
+
+  if(vehicleList != null){
+  let vehicleListHTML = '<style>.container{display:flex;flex-wrap:wrap;background-color:aqua;height:100vh;width:100%;margin:0!important;}.sidebar{position:relative;top:0;left:0;width:30%;height:100%;background-color:#fff;overflow-y:auto;padding:0 2rem;box-sizing:border-box;user-select:none;}.sidebar .fixedHeader{position:fixed;z-index:5;width:inherit;padding-right:5rem;height:7.5rem;background-color:#fff;}.sidebar .fixedHeader select{margin-right:5rem;}.sidebar .fixedHeader h2{text-transform:uppercase;font-weight:bolder;font-stretch:expanded;padding:0;margin-left:2rem;width:100%!important;}.map-outter-container{position:relative;flex:1;height:100%;background-color:#eeff00;overflow-y:auto;padding:0px!important;box-sizing:border-box;}.map-frame{height:100vh!important;}.map-container{box-sizing:border-box;position:relative!important;width:100%;}.sidebar{min-width:200px;}.sidebar li,.sidebar ul{list-style-type:none!important;padding-left:0!important;}.sidebar>ul{margin-top:10rem;}.vehicle-radio{margin-right:10px;}.vehicle-info{display:flex;flex-direction:column;line-height:1.2;}.vehicle-title{font-size:2rem;font-weight:300;color:#333;}.company-name{font-size:1.2rem;font-weight:900;color:#999;padding-left:0.1rem;}.seating-places{font-size:12px;color:#888;}.wheelchair-icon,.seating-icon{margin-top:5px;display:flex;font-size:1.6rem;padding-right:0.3rem;opacity:0.5;}.wheelchair-icon img,.seating-icon img{width:1.6rem;opacity:0.5;}.seating{display:flex;}.vehicle-label-outter{display:flex;align-items:center;cursor:pointer;transition:background-color 0.6s ease;flex-wrap:wrap;border-bottom:#ececec solid;}.vehicle-highlight{display:flex;align-items:center;cursor:pointer;transition:background-color 0.6s ease;flex-wrap:wrap;width:100%;padding:1.6rem 0 1.6rem 0;}.vehicle-highlight:hover{background-color:#d3d3d3!important;}.vehicle-highlight.selected .vehicle-icon{background-color:#277fc9;}.vehicle-label{display:flex;align-items:center;padding:1rem 2rem 1rem 1rem;cursor:pointer;transition:background-color 0.6s ease;}.vehicle-radio{display:none}.vehicle-selector{width:50px;height:50px;display:inline-block;border-radius:10px;overflow:hidden;cursor:pointer;transition:background-color 0.3s ease;}.vehicle-selector:hover{background-color:#f0f0f0;}.vehicle-icon{width:100%;height:100%;min-height:3.6rem;min-width:3.6rem;padding:1.2rem;border-radius:1.6rem;border:solid 0.3rem #e9e9e9;background-color:#f1f1f1;display:flex;align-items:center;}.selected .vehicle-selector{background-color:#4a90e2;}.vehicle-icon img{width:100%;opacity:1;max-width:3.6rem;max-height:3.6rem;}.vehicle-details{flex:1;}.selected .vehicle-selector{background-color:#4a90e2;}.selected .vehicle-icon img{filter:invert(100);}.shrunk{height:0!important;padding:0;opacity:0;overflow:hidden;transition:height 0.6s ease,padding 0.6s ease,opacity 0.3s ease-in;border:none!important;}.vehicle-label-outter:not(.shrunk){transition:height 0.6s ease,padding 0.6s ease,opacity 0.3s ease-in;}.shrunk>img{opacity:0.2;}.person-icon{width:auto;height:100%;min-height:3.6rem;min-width:3.6rem;padding:2rem 1.2rem 1.2rem 1.2rem;border-radius:1.6rem;border:solid 0.3rem #e9e9e9;background-color:#f1f1f1;display:flex;align-items:center;}.person-label{display:flex;align-items:center;cursor:pointer;padding:1.2rem 0;padding:1rem 0rem 1rem 0rem;width:100%!important;}.vehicle-label-outter .person-label:hover{background-color:#d3d3d3;}.people-list{width:100%!important;background-color:#fff;margin-bottom:-1.6rem;}.person-checkbox{padding:0 1rem 0 1rem;margin:0 1.5rem 0 1.5rem;}.person-checkbox[type=checkbox]{-ms-transform:scale(1.5);-moz-transform:scale(1.5);-webkit-transform:scale(1.5);-o-transform:scale(1.5);transform:scale(1.5);}.person-checkbox:checked+.person-icon img{filter:invert(100%);}.person-icon img{width:3.6rem;height:3.6rem;opacity:1;}.person-details{flex:1;}.person-title{font-size:2rem;font-weight:300;color:#333;}.person-details{flex:1;display:flex;flex-direction:column;}.person-name{font-size:1.6rem;font-weight:bold;color:#333;}.person-company{font-weight:900;font-size:1.2rem;color:#999;}.person-coordinates{font-size:1.2rem;color:#999;}.custom-select{appearance:none;-webkit-appearance:none;-moz-appearance:none;padding:8px;font-size:16px;border:1px solid #ccc;border-radius:5px;background-color:#f8f8f8;cursor:pointer;}.custom-select:focus{outline:none;border-color:#007bff;}.custom-select option{padding:0.8rem;font-size:1.6rem;cursor:pointer;}.fixedHeader{display:flex;align-items:center;}.submit{position:absolute;bottom:5rem;right:7.5rem;z-index:20000;}.hide{display:none;}.submit .btn.btn-primary{background:none;border:none;color:inherit;font:inherit;padding:0;cursor:pointer;outline:none;font-size:2rem;font-weight:600;color:#333;display:inline-block;font-size:2em;padding:1em 2em;margin-top:10rem;margin-bottom:6rem;-webkit-appearance:none;appearance:none;background-color:#f1f1f1;color:#333333;border-radius:1rem;border:none;cursor:pointer;position:relative;transition:transform ease-in 0.1s,box-shadow ease-in 0.25s;box-shadow:0 2px 25px rgba(255,255,255,0.5);}.submit .btn.btn-primary:focus{outline:0;}.submit .btn.btn-primary:active{transform:scale(0.9);background-color:darken(#f1f1f1,5%);box-shadow:0 2px 25px rgba(120,120,120,0.2);}.submit .btn.btn-primary.animate:before,.submit .btn.btn-primary.animate:after{position:absolute;content:``;display:block;width:140%;height:100%;left:-20%;z-index:-1000;transition:all ease-in-out 0.5s;background-repeat:no-repeat;}.submit .btn.btn-primary:before{display:none;top:-75%;background-image:radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,transparent 20%,#f1f1f1 20%,transparent 30%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,transparent 10%,#f1f1f1 15%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%);background-size:10% 10%,20% 20%,15% 15%,20% 20%,18% 18%,10% 10%,15% 15%,10% 10%,18% 18%;}.submit .btn.btn-primary:after{display:none;bottom:-75%;background-image:radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,transparent 10%,#f1f1f1 15%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%);background-size:15% 15%,20% 20%,18% 18%,20% 20%,15% 15%,10% 10%,20% 20%;}.submit .btn.btn-primary.animate:active:before{background-position:0% 80%,0% 20%,10% 40%,20% 0%,30% 30%,22% 50%,50% 50%,65% 20%,90% 30%;}.submit .btn.btn-primary.animate:active:after{background-position:0% 90%,20% 90%,45% 70%,60% 110%,75% 80%,95% 70%,110% 10%;background-size:0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%;}.submit .btn.btn-primary.animate:before{display:block;animation:topBubbles ease-in-out 0.75s forwards;}.submit .btn.btn-primary.animate:after{display:block;animation:bottomBubbles ease-in-out 0.75s forwards;}@keyframes topBubbles{0%{background-position:5% 90%,10% 90%,10% 90%,15% 90%,25% 90%,25% 90%,40% 90%,55% 90%,70% 90%;}50%{background-position:0% 80%,0% 20%,10% 40%,20% 0%,30% 30%,22% 50%,50% 50%,65% 20%,90% 30%;}100%{background-position:0% 70%,0% 10%,10% 30%,20% -10%,30% 20%,22% 40%,50% 40%,65% 10%,90% 20%;background-size:0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%;}}@keyframes bottomBubbles{0%{background-position:10% -10%,30% 10%,55% -10%,70% -10%,85% -10%,70% -10%,70% 0%;}50%{background-position:0% 80%,20% 80%,45% 60%,60% 100%,75% 70%,95% 60%,105% 0%;}100%{background-position:0% 90%,20% 90%,45% 70%,60% 110%,75% 80%,95% 70%,110% 10%;background-size:0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%;}}</style>';
+ // console.log(this.vehicles);
+
+  for(let vehicleObj of filteredVehicles){
+
+    vehicleListHTML +=  
+    `<li><label class="vehicle-label-outter" >
+              
+    <div class="vehicle-highlight" id="vehicle-highlight-`+ vehicleObj.id + `" (click)="selectCheckbox(vehicle, $event)">
+      <input type="radio" name="vehicle" class="vehicle-radio" [value]="vehicle" id="checkbox-vehicle-` + vehicleObj.id + `">
+      <label class="vehicle-label vehicle-` + vehicleObj.id+ `" [class.selected]="selectedVehicle === vehicle" >
+        <div class="vehicle-icon">
+            <img src="assets/van-shuttle-solid.svg" alt="Vehicle Icon">
+        </div>
+      </label>
+      <div class="vehicle-info">
+        <div class="vehicle-title">` + vehicleObj.VehicleDescription +`</div>
+        <div class="company-name">` + vehicleObj.CompanyName +`</div>
+        
+        <div class="seating">
+            <div class="seating-icon" *ngIf="vehicle.seatingPlaces">
+                <div class="seatNR">` + vehicleObj.seatingPlaces +`</div>
+                <img src="../../assets/person-seat.svg" alt="Seat Accessible">
+            </div>`
+            
+            if (vehicleObj.canTransportWheelchairs) {
+              vehicleListHTML += `
+                      <div class="wheelchair-icon">
+                          <div class="seatNR">1</div>
+                          <img src="../../assets/wheelchair-solid.svg" alt="Wheelchair Accessible">
+                      </div>
+          `;
+          }
+          
+          vehicleListHTML += 
+          ` </div>
+      </div>
+    </div>
+    
+    <div class="people-list" *ngIf="selectedVehicle">
+    <!--<h3>${vehicleObj.CompanyName} Employees:</h3>-->
+    <ul id="vehicle-peopleList-${vehicleObj.id}" class="vehicle-peopleList">
+        
+    </ul>
+</div>
+
+</label>
+</li>
+    
+    `
+
+    }
+    vehicleList!.innerHTML = vehicleListHTML;
+
+    for (let vehicleObj of filteredVehicles) {
+      const highlight = document.getElementById(`vehicle-highlight-`+ vehicleObj.id);
+      //console.log(highlight);
+      if (highlight) {
+        //console.log(highlight);
+          highlight.addEventListener('click', (event) => {
+              this.selectCheckbox(vehicleObj, event);
+          });
+      }
+  }
+  }
+  }
+
+  populateSelectBox(){
+
+    this.vehicles.forEach(vehicle => {
+      if(!this.companies.includes(vehicle.CompanyName)){
+      this.companies.push(vehicle.CompanyName);
+      }
+    });
+
+    let selectOptionsHtml = ' <option></option>';
+    for (let company of this.companies) {selectOptionsHtml += `<option value="${company}">${company}</option>`; }
+   // console.dir(this.companies);
+   // console.dir(this.vehicles);
+    const selectBox = document.getElementById('custom-select-box');
+    selectBox!.innerHTML = selectOptionsHtml;
+  }
+
+async getFilteredVehicles(): Promise<VehicleLocal[]>  {
+
+  console.log(this.peopleDatabase);
+
+  await this.waitForVehicles();
+
+  console.log(this.peopleDatabase);
+
+  this.people = this.peopleDatabase;
+
+  this.getMapCoordinates();
+
+  this.populateSelectBox();
+
+  this.createVehicleList();
+
+  if (this.selectedCompany) {
+    return this.vehicles.filter(vehicle => vehicle.CompanyName === this.selectedCompany);
   } else {
-      return this.vehicles.filter(vehicle => vehicle.CompanyName === this.selectedCompany);
+    return this.vehicles;
   }
 }
 
@@ -240,24 +464,44 @@ for(let vehicle of this.vehicles){
 }
 }
 
-if(this.selectedVehicle.Id != undefined)
+if(this.selectedVehicle.id != undefined)
   {
- // console.log(this.selectedVehicle.Id);
-    const response = await this.calculateRoute();
+ // console.log(this.selectedVehicle.id);
+    let response = await this.calculateRoute();
   //  console.log(response);
 
     let displayRoute;
+
+    //console.log(response.routes);
+    //console.dir(response);
+    
+
+    if(response != null){
     for (const route of response.routes) {
-      if (route.vehicle == this.selectedVehicle.Id) {
+      if (route.vehicle == this.selectedVehicle.id) {
        // console.log(displayRoute);
         displayRoute = route;
           break;
       }
     }
-
+  }else{
+    response ={
+      code: 0,
+      routes: [],
+      summary: {
+          cost: 0,
+          routes: 0,
+          unassigned: 0,
+          delivery: [],
+          amount: []
+      },
+      unassigned: []
+  };
+  }
+ 
     this.selectedRoute = displayRoute;
 
-    this.createPeopleList(displayRoute, this.selectedVehicle.Id);
+    this.createPeopleList(displayRoute, this.selectedVehicle.id);
     
     /// Here
 /*  public routesData = [
@@ -298,7 +542,7 @@ if(this.selectedVehicle.Id != undefined)
           id: (step.type == "start" ||step.type == "end") ? routeObj.vehicle + 10000 : step.id, 
           sequenceNumber: count,
           coordinates: [step.location[1], step.location[0]],
-          mainRoute: (this.selectedVehicle.Id == routeObj.vehicle) ? true : false
+          mainRoute: (this.selectedVehicle.id == routeObj.vehicle) ? true : false
         }
         count++;
         routesArray.push(addRoute);
@@ -307,6 +551,9 @@ if(this.selectedVehicle.Id != undefined)
   }
 
   createPeopleList(route: any, vehicleId: number){
+
+    console.log("People List is called");
+
     const findPersonById = (id: number) => this.peopleDatabase.find(person => person.id === id);
     let peopleList = document.getElementById("vehicle-peopleList-" + vehicleId);
    // console.log(vehicleId);
@@ -316,6 +563,24 @@ if(this.selectedVehicle.Id != undefined)
 
     let peopleListHTML = '<style>.person-icon { width: auto; height: 100%; min-height: 3.6rem; min-width: 3.6rem; padding: 2rem 1.2rem 1.2rem 1.2rem; border-radius: 1.6rem; border: solid 0.3rem #E9e9e9; background-color: #F1F1F1; display: flex; align-items: center;margin: 0 2rem 0 2rem; }    .person-label { display: flex; align-items: center; cursor: pointer; padding: 1.2rem 0; padding: 1rem 0rem 1rem 0rem; width: 100% !important; } .vehicle-label-outter .person-label:hover{ background-color: #D3D3D3; }.people-list{ width: 100% !important; background-color: #ffffff; margin-bottom: -1.6rem; }.person-checkbox { padding: 0 1rem 0 1rem; margin: 0 1.5rem 0 1.5rem; }.person-checkbox[type=checkbox] { -ms-transform: scale(1.5); -moz-transform: scale(1.5); -webkit-transform: scale(1.5); -o-transform: scale(1.5); transform: scale(1.5); }.person-checkbox:checked + .person-icon img { filter: invert(100%); }.person-icon img { width: 3.6rem; height: 3.6rem; opacity: 1; }.person-details { flex: 1; }.person-title { font-size: 2rem; font-weight: 300; color: #333; }.person-details { flex: 1; display: flex; flex-direction: column; }.person-name { font-size: 1.6rem; font-weight: bold; color: #333; }.person-company{ font-weight: 900; font-size: 1.2rem; color: #999; }.person-coordinates { font-size: 1.2rem; color: #999; }</style>';
 
+
+    console.log(route);
+    console.log(route ? "True" : "False");
+
+
+    if(!route){
+      peopleListHTML +=  `
+      <li>
+          <label class="person-label"><div class="person-icon">
+                  <img src="../../assets/user-solid.svg" alt="Person Icon">
+              </div>
+              <div class="person-details">
+                  <span class="person-name"> Nothing here!</span>
+              </div>
+          </label>
+      </li>`;
+    }
+    else {
     for(let step of route.steps){
       
       if(step?.id < 1000){
@@ -343,17 +608,17 @@ if(this.selectedVehicle.Id != undefined)
 
       }
     }
-
+  }
     peopleList.innerHTML = peopleListHTML;
     }
   }
 
 
-createRoutes(vehicles: Vehicle[], people: Person[]): Route[] {
+createRoutes(vehicles: VehicleLocal[], people: PersonLocal[]): Route[] {
   const routes: Route[] = [];
 
   // Group people by company
-  const peopleByCompany: {[key: string]: Person[]} = {};
+  const peopleByCompany: {[key: string]: PersonLocal[]} = {};
   people.forEach(person => {
       if (!peopleByCompany[person.company]) {
           peopleByCompany[person.company] = [];
@@ -363,7 +628,7 @@ createRoutes(vehicles: Vehicle[], people: Person[]): Route[] {
 
   // Assign people to vehicles
   vehicles.forEach(vehicle => {
-      const assignedPeople: Person[] = [];
+      const assignedPeople: PersonLocal[] = [];
       const peopleForCompany = peopleByCompany[vehicle.CompanyName] || [];
       peopleForCompany.forEach(person => {
           // Check if the vehicle can transport wheelchairs or if the person doesn't require one
@@ -374,7 +639,7 @@ createRoutes(vehicles: Vehicle[], people: Person[]): Route[] {
 
       // Create route for the vehicle
       const route: Route = {
-          vehicle_id: vehicle.Id,
+          vehicle_id: vehicle.id,
           start_location: [vehicle.coordinates.x, vehicle.coordinates.y],
           end_location: [vehicle.coordinates.x, vehicle.coordinates.y],
           people: assignedPeople
@@ -383,6 +648,26 @@ createRoutes(vehicles: Vehicle[], people: Person[]): Route[] {
   });
 
  // console.dir(routes);
+
+/*
+
+    const newRoutePoint: RoutePoint = {
+      id: 0,
+      seq: parseInt(this.seq, 10),
+      startPoint: parseInt(this.startPoint, 10),
+      person: parseInt(this.person, 10)
+    };
+    this.routePointService.save(newRoutePoint).subscribe(
+      (response) => {
+        console.log('Route point added successfully:', response);
+        // You can add further logic here, such as resetting the form or displaying a success message
+      },
+      (error) => {
+        console.error('Error adding route point:', error);
+        // Handle error scenario, such as displaying an error message to the user
+      }
+    );*/
+
 
   return routes;
 }
@@ -409,7 +694,9 @@ async calculateRoute(){
 
   let Optimization = new Openrouteservice.Optimization({api_key: "5b3ce3597851110001cf6248d4673641728346c68523ae8c4c8158aa"});
 
-  const shipmentsForOptimization = this.people.map(person => ({
+  
+  const selectedPeople = this.people.filter(person => person.company === this.selectedVehicle.CompanyName);
+  const shipmentsForOptimization = selectedPeople.map(person => ({
     amount: [1], 
     skills: [(person.needsWheelchair ? 2 : 1)],
     pickup: {
@@ -423,10 +710,17 @@ async calculateRoute(){
         location: [person.endCoordinate.y, person.endCoordinate.x]
     }
   }));
+  
+  const selectedVehicles = this.vehicles.filter(vehicle => vehicle.CompanyName === this.selectedVehicle.CompanyName);
+ 
+  console.log(selectedVehicles);
 
-  const vehiclesForOptimization = this.vehicles.map(vehicle => ({
-    id: vehicle.Id,
-    description: vehicle.VehicleDescription + " " + vehicle.CompanyName + " " + vehicle.Id + " " + Math.floor((Math.random() * 9999999999) + 1),
+
+// return [this.vehicles.map(vehicles => [vehicles.coordinates.x, vehicles.coordinates.y]), true];
+
+  const vehiclesForOptimization = selectedVehicles.map(vehicle => ({
+    id: vehicle.id,
+    description: vehicle.VehicleDescription + " " + vehicle.CompanyName + " " + vehicle.id + " " + Math.floor((Math.random() * 9999999999) + 1),
     profile: 'driving-car',
     start: [vehicle.coordinates.y, vehicle.coordinates.x],
     end: [vehicle.coordinates.y, vehicle.coordinates.x],
@@ -434,17 +728,38 @@ async calculateRoute(){
     skills: (vehicle.canTransportWheelchairs ? [1, 2] : [1]),
   }));
 
+  console.log(vehiclesForOptimization);
+
+  console.log(shipmentsForOptimization);
+
 try {
     const response = await Optimization.optimize({
     shipments: shipmentsForOptimization,
     vehicles: vehiclesForOptimization,
   });
-
- // console.log("response: ", response);
+  console.dir(shipmentsForOptimization);
+  console.dir(vehiclesForOptimization);
+  console.dir(response);
   return response;
 
   }catch (error) {
     console.error("Error occurred while calculating route:", error);
+
+    console.log("vehicle-peopleList-" + this.selectedVehicle.id);
+    let peopleList = document.getElementById("vehicle-peopleList-" + this.selectedVehicle.id);
+    
+    let peopleListHTML =  `
+    <li>
+        <label class="person-label"><div class="person-icon">
+                <img src="../../assets/user-solid.svg" alt="Person Icon">
+            </div>
+            <div class="person-details">
+                <span class="person-name"> Nothing here!</span>
+            </div>
+        </label>
+    </li>`;
+    peopleList!.innerHTML = peopleListHTML;
+    return null;
   }
   return null;
 }
@@ -457,11 +772,61 @@ try {
 
 }*/
 
-  /*
-  ngOnInit(): void {
-    this.loadvehicles();
-  }
+vehicles$!: Observable<Vehicle[]>;
 
+  ngOnInit(): void {
+  //{ id: 4, name: 'Bob Brown', startCoordinate: { x: 48.20800, y: 16.37170 }, endCoordinate: { x: 48.2083, y: 16.3723 }, company: 'Starlight Rides', needsWheelchair: true }
+    this.personService.getAllPeople().subscribe(
+      (data: any[]) => { 
+        this.peopleDatabase = data.map(people => ({
+          id: people.id,
+          name: people.name,
+          startCoordinate: {
+            x: parseFloat(people.startCoordinate.substring(1, people.startCoordinate.indexOf(','))),
+            y: parseFloat(people.startCoordinate.substring(people.startCoordinate.indexOf(',') + 1, people.startCoordinate.length - 1))      
+          },
+          endCoordinate: { 
+            x: parseFloat(people.endCoordinate.substring(1, people.endCoordinate.indexOf(','))),
+            y: parseFloat(people.endCoordinate.substring(people.endCoordinate.indexOf(',') + 1, people.endCoordinate.length - 1))      
+           },
+          company: people.company,
+          needsWheelchair: people.wheelchair !== undefined ? people.wheelchair : false
+        }));
+      },
+      (error) => { console.error('Error fetching people data:', error);});
+      this.people = this.peopleDatabase;
+
+  
+      /*
+      this.personService.getAllPeople().subscribe(
+        (data: any[]) => { 
+          this.peopleDatabase = data; 
+        },
+        (error) => { console.error('Error fetching people data:', error);});
+        this.people = this.peopleDatabase;
+    */
+
+    this.vehicleService.getAllVehicles().subscribe(
+        (data: any[]) => { 
+          
+          this.vehicles = data.map(vehicle => ({
+            id: vehicle.id,
+            CompanyName: vehicle.companyName,
+            coordinates: { 
+              x: parseFloat(vehicle.coordinate.substring(1, vehicle.coordinate.indexOf(','))),
+              y: parseFloat(vehicle.coordinate.substring(vehicle.coordinate.indexOf(',') + 1, vehicle.coordinate.length - 1))      
+             },
+            canTransportWheelchairs: (vehicle.canTransportWheelchairs == 1) ? true : false,
+            VehicleDescription: vehicle.vehicleDescription,
+            seatingPlaces: vehicle.seatingPlaces
+          }));
+         },
+      (error) => { console.error('Error fetching people data:', error);});
+
+      this.getFilteredVehicles();
+
+  }
+/*
   loadvehicles() {
     this.vehicleService.getvehicles().subscribe((data: any[]) => {
       this.vehicles = data;

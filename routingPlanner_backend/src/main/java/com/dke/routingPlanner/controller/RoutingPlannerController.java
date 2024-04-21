@@ -51,9 +51,11 @@ public class RoutingPlannerController {
         // Append information about each RoutePoint to the response
         for (RoutePoint routePoint : routePoints) {
             response.append("RoutePoint ID: ").append(routePoint.getId()).append("<br>");
-            response.append("Sequence: ").append(routePoint.getSeq()).append("<br>");
-            response.append("Start Point: ").append(routePoint.getStartPoint()).append("<br>");
-            response.append("Person: ").append(routePoint.getPerson()).append("<br><br>");
+            response.append("Description: ").append(routePoint.getDescription()).append("<br>");
+            response.append("Sequenz: ").append(routePoint.getSequenz()).append("<br>");
+            response.append("AtHome: ").append(routePoint.isAtHome()).append("<br>");
+            response.append("Coordinates: ").append(routePoint.getCoordinates()).append("<br>");
+            response.append("Vehicle: ").append(routePoint.getVehicle()).append("<br><br>");
         }
 
         return response.toString();

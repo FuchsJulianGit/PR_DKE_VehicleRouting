@@ -9,15 +9,19 @@ public class RoutePoint {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "SEQ")
-    private int seq;
+    @Column(name = "DESCRIPTION")
+    private String description;
 
-    @Column(name = "START_POINT")
-    private int startPoint;
+    @Column(name = "SEQUENZ")
+    private int sequenz;
 
-    @Column(name = "PERSON")
-    private int person;
+    @Column(name = "ATHOME")
+    private boolean atHome;
+    @Column(name = "COORDINATES")
+    private String coordinates;
 
+    @Column(name = "VEHICLE")
+    private int vehicle;
 
     // Getters and setters
     public int getId() {
@@ -28,26 +32,44 @@ public class RoutePoint {
         this.id = id;
     }
 
-    public int getSeq() {
-        return seq;
+    public String getDescription() {
+        return description;
     }
 
-    public void setSeq(int seq) { this.seq = seq; }
-
-    public int getStartPoint() {
-        return startPoint;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public void setStartPoint(int startPoint) {
-        this.startPoint = startPoint;
+    public int getSequenz() {
+        return sequenz;
     }
 
-    public int getPerson() {
-        return person;
+    public void setSequenz(int sequenz) {
+        this.sequenz = sequenz;
     }
 
-    public void setPerson(int person) {
-        this.person = person;
+    public boolean isAtHome() {
+        return atHome;
+    }
+
+    public void setAtHome(boolean atHome) {
+        this.atHome = atHome;
+    }
+
+    public String getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(String coordinates) {
+        this.coordinates = coordinates;
+    }
+
+    public int getVehicle() {
+        return vehicle;
+    }
+
+    public void setVehicle(int vehicle) {
+        this.vehicle = vehicle;
     }
 }
 

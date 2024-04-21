@@ -1,8 +1,10 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { RoutePoint } from '../RoutePoint/route-point';
+import { RoutePoint, Person, Vehicle } from '../Interfaces/route-point';
 import { RoutePointService } from './route-point-service.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
+
 
 @Component({
   selector: 'app-route-point-list',
@@ -12,6 +14,8 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './route-point-list.component.scss',
   providers: [RoutePointService]
 })
+
+
 
 export class RoutePointListComponent implements OnInit{
   
@@ -23,19 +27,24 @@ export class RoutePointListComponent implements OnInit{
 
   constructor(public routePointService: RoutePointService){ }
 
+ 
+
   ngOnInit(){
     this.routePointService.findAll().subscribe((data: RoutePoint[]) => {
       this.route_points = data;
-      console.log("THIS: " + this.route_points)
+      console.log("THIS: ");
+      console.dir(this.route_points);
     });
   }
 
   onSubmit(): void {
-    const newRoutePoint: RoutePoint = {
-      id: 0,
-      seq: parseInt(this.seq, 10),
-      startPoint: parseInt(this.startPoint, 10),
-      person: parseInt(this.person, 10)
+   /* const newRoutePoint: RoutePoint = {
+      Id: 0,
+      Sequenz: parseInt(this.route_points.Sequenz, 10),
+      Vehicle: parseInt(this.person, 10),
+      Description: "",
+      AtHome: true,
+      Coordinates: []
     };
     this.routePointService.save(newRoutePoint).subscribe(
       (response) => {
@@ -46,7 +55,7 @@ export class RoutePointListComponent implements OnInit{
         console.error('Error adding route point:', error);
         // Handle error scenario, such as displaying an error message to the user
       }
-    );
+    );*/
   }
 
 

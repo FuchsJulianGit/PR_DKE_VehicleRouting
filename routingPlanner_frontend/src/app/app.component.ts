@@ -18,6 +18,4 @@ import * as L from 'leaflet';
 
 export class AppComponent {
   title = 'routingPlanner_frontend';
-
-
 }

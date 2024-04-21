@@ -12,7 +12,10 @@ import 'leaflet/dist/leaflet.css'
   styleUrls: ['./map.component.scss']
 })
 
+
+
 export class MapComponent implements AfterViewInit, OnChanges {
+  markerCount: number = 0;
 
 //  @Input() mapCoordinatesInput: any[] = [];
 
@@ -60,13 +63,16 @@ export class MapComponent implements AfterViewInit, OnChanges {
 
   private previousInput: any = null;
 
+
+
   ngOnChanges(changes: SimpleChanges): void {
 
     const [mapCoordinatesInput, inputType] = this.inputValue;
+
     this.mapCoordinatesInput = mapCoordinatesInput;
     this.inputType = inputType;
 
-  //Draw Routes 
+    //Draw Routes 
     if(inputType == false){
       if(this.mapCoordinatesInput != undefined && this.mapInitialized == true){
         if( JSON.stringify(this.mapCoordinates) !==  JSON.stringify(this.mapCoordinatesInput)){
@@ -79,11 +85,13 @@ export class MapComponent implements AfterViewInit, OnChanges {
     }
 
     //Draw Markers
-    if(inputType == true){
+    if(inputType == true || this.markerCount != mapCoordinatesInput.length){
       if(this.mapCoordinatesInput != undefined && this.mapInitialized == true){
       if( JSON.stringify(this.mapCoordinates) !==  JSON.stringify(this.mapCoordinatesInput)){
         let x = 0;
         let y = 0;
+
+      //  console.log(mapCoordinatesInput);
 
         for (let i = 0; i < this.mapCoordinatesInput.length; i++) {
           x += this.mapCoordinatesInput[i][0];  
@@ -98,7 +106,11 @@ export class MapComponent implements AfterViewInit, OnChanges {
         this.drawMarkers();
     }
      }
+     this.markerCount = mapCoordinatesInput.length;
     }
+
+    
+
   }
 
   private initializeMap() {
@@ -123,10 +135,18 @@ export class MapComponent implements AfterViewInit, OnChanges {
   private drawMarkers() {
     this.resetMap();
 
+
+    //console.log(this.mapCoordinates);
+    //console.log(this.inputValue);
+
     this.markers = [];
     Object.values(this.mapCoordinates).forEach((markerCoord: any, index) => {
+
+      const latitude = markerCoord[0]; // Extract latitude
+      const longitude = markerCoord[1]; // Extract longitude
+
       if (!this.isMarkerDrawn(markerCoord)) {
-      var marker = L.marker(this.mapCoordinates[index]).addTo(this.map);
+      var marker = L.marker([latitude, longitude]).addTo(this.map);
       this.markers.push(marker);
       }
     });
@@ -165,11 +185,11 @@ private isMarkerDrawn(markerCoord: any): boolean {
   private initializeRouting() {
     this.resetMap();
 
-    console.log(this.routesData);
+    //console.log(this.routesData);
 
     const groupedRoutes = this.groupRoutesByRouteName(this.routesData);
 
-    console.log(groupedRoutes);
+    //console.log(groupedRoutes);
 
 
     Object.values(groupedRoutes).forEach((routes: any[], index) => {
@@ -180,7 +200,7 @@ private isMarkerDrawn(markerCoord: any): boolean {
   
 
       for (var i = 0; i < input.length; i++) {
-        console.log(input[i]);
+        //console.log(input[i]);
         var ltln = L.latLng(input[i][0], input[i][1]);
         L.circleMarker(ltln, {
           radius: 2
@@ -201,8 +221,8 @@ private isMarkerDrawn(markerCoord: any): boolean {
         })
       }))*/
 
-console.log(routes);
-console.log( this.innerRoute);
+      //console.log(routes);
+      //console.log( this.innerRoute);
 
 
          this.innerRoute[index] = L.Routing.control({
