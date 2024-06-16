@@ -17,11 +17,11 @@ public class PersonService {
         return repository.save(person);
     }
 
-    public List<Person> savePeople(List<Person> people) {
-        return (List<Person>) repository.saveAll(people);
+    public List<Person> savePerson(List<Person> person) {
+        return (List<Person>) repository.saveAll(person);
     }
 
-    public List<Person> getPeople() {
+    public List<Person> getPerson() {
         return (List<Person>) repository.findAll();
     }
 
@@ -38,7 +38,7 @@ public class PersonService {
         return repository.save(person);
     }
 
-    public Iterable<Person> getAllPeople() {
+    public Iterable<Person> getAllPerson() {
         return repository.findAll();
     }
 }

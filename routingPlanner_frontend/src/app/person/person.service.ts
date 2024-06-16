@@ -9,16 +9,20 @@ import { Person } from '../Interfaces/route-point';
 })
 export class PersonService {
 
-  private baseUrl = 'http://localhost:8080/';
+  //private baseUrl = 'http://localhost:8080/';
+  private baseUrl = 'http://localhost:8083/';
+
+
+
 
   constructor(private http: HttpClient) { }
 
-  getAllPeople(): Observable<Person[]> {
-    return this.http.get<Person[]>(this.baseUrl + 'people');
+  getAllPerson(): Observable<Person[]> {
+    return this.http.get<Person[]>(this.baseUrl + 'person');
   }
   
-  save(people: Person): Observable<Person> {
-    return this.http.post<Person>(this.baseUrl + 'addPerson', people);
+  save(person: Person): Observable<Person> {
+    return this.http.post<Person>(this.baseUrl + 'addPerson', person);
   }
 
 }

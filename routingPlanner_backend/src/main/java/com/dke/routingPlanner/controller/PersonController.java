@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-public class PeopleController {
+public class PersonController {
 
     @Autowired
     private PersonService personService;
@@ -18,12 +18,12 @@ public class PeopleController {
         return personService.savePerson(person);
     }
 
-    @GetMapping("/people")
-    public Iterable<Person> findAllPeople() {
-        return personService.getAllPeople();
+    @GetMapping("/person")
+    public Iterable<Person> findAllPerson() {
+        return personService.getAllPerson();
     }
 
-    @GetMapping("/people/{id}")
+    @GetMapping("/person/{id}")
     public Person findPersonById(@PathVariable int id) {
         return personService.getPerson(id);
     }

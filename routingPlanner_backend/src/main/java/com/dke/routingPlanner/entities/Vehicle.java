@@ -15,8 +15,11 @@ public class Vehicle {
     @Column(name = "VEHICLE_DESCRIPTION")
     private String vehicleDescription;
 
-    @Column(name = "COORDINATE")
-    private String coordinate;
+    @Column(name = "START_COORDINATE")
+    private String startCoordinate;
+
+    @Column(name = "END_COORDINATE")
+    private String endCoordinate;
 
     @Column(name = "CAN_TRANSPORT_WHEELCHAIRS")
     private boolean canTransportWheelchairs;
@@ -28,10 +31,11 @@ public class Vehicle {
     public Vehicle() {
     }
 
-    public Vehicle(String companyName, String vehicleDescription, String coordinate, boolean canTransportWheelchairs, int seatingPlaces) {
+    public Vehicle(String companyName, String vehicleDescription, String startCoordinate, String endCoordinate, boolean canTransportWheelchairs, int seatingPlaces) {
         this.companyName = companyName;
         this.vehicleDescription = vehicleDescription;
-        this.coordinate = coordinate;
+        this.startCoordinate = startCoordinate;
+        this.endCoordinate = endCoordinate;
         this.canTransportWheelchairs = canTransportWheelchairs;
         this.seatingPlaces = seatingPlaces;
     }
@@ -61,12 +65,20 @@ public class Vehicle {
         this.vehicleDescription = vehicleDescription;
     }
 
-    public String getCoordinate() {
-        return coordinate;
+    public String getStartCoordinate() {
+        return startCoordinate;
     }
 
-    public void setCoordinate(String coordinate) {
-        this.coordinate = coordinate;
+    public void setStartCoordinate(String coordinate) {
+        this.startCoordinate = coordinate;
+    }
+
+    public String getEndCoordinate() {
+        return endCoordinate;
+    }
+
+    public void setEndCoordinate(String coordinate) {
+        this.endCoordinate = coordinate;
     }
 
     public boolean isCanTransportWheelchairs() {

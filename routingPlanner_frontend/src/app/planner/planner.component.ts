@@ -10,7 +10,6 @@ import { RoutePointService } from '../route-point-list/route-point-service.servi
 import { VehicleService } from '../vehicle/vehicle.service';
 import { PersonService } from '../person/person.service';
 
-
 import { RoutePoint, Person, Vehicle } from '../Interfaces/route-point'
 import Openrouteservice from 'openrouteservice-js';
 import { routes } from '../app.routes';
@@ -27,7 +26,8 @@ interface Coordinate {
 interface VehicleLocal {
   id: number;
   CompanyName: string;
-  coordinates: Coordinate;
+  startCoordinate: Coordinate;
+  endCoordinate: Coordinate;
   canTransportWheelchairs: boolean;
   VehicleDescription: 'Thunderbolt 5000';
   seatingPlaces: number;
@@ -46,7 +46,7 @@ interface Route {
   vehicle_id: number;
   start_location: number[];
   end_location: number[];
-  people: PersonLocal[];
+  person: PersonLocal[];
 }
 
 interface RouteFormat {
@@ -92,7 +92,7 @@ export class PlannerComponent {
     { Id: 12, CompanyName: 'Phoenix Transports', VehicleDescription: 'Firebird Easy', coordinates: { x: 47.3316, y: 14.4625 }, canTransportWheelchairs: false, seatingPlaces: 8 }*/
   ];
   // Get this data from Database
-  peopleDatabase: any[] = [
+  personDatabase: any[] = [
  /*  { id: 1, name: 'John Doe', startCoordinate: { x: 47.60950, y: 13.04160 }, endCoordinate: { x: 47.6098, y: 13.0422 }, company: 'Speedy Transport', needsWheelchair: true },
     { id: 2, name: 'Jane Smith', startCoordinate: { x: 47.60990, y: 13.04130 }, endCoordinate: { x: 47.6096, y: 13.0418 }, company: 'Speedy Transport', needsWheelchair: false },
     { id: 3, name: 'Alice Johnson', startCoordinate: { x: 47.60940, y: 13.04180 }, endCoordinate: { x: 47.6097, y: 13.0415 }, company: 'Speedy Transport', needsWheelchair: false  },
@@ -102,7 +102,7 @@ export class PlannerComponent {
     { id: 7, name: 'Eve White', startCoordinate: { x: 48.20850, y: 16.37140 }, endCoordinate: { x: 48.3062, y: 16.3709 }, company: 'Galactic Motors', needsWheelchair: false  },*/
   ]
 
-  people: any[] = [
+  person: any[] = [
     /*{ id: 1, name: 'John Doe', startCoordinate: { x: 47.60950, y: 13.04160 }, endCoordinate: { x: 47.6098, y: 13.0422 }, company: 'Speedy Transport', needsWheelchair: true },
     { id: 2, name: 'Jane Smith', startCoordinate: { x: 47.60990, y: 13.04130 }, endCoordinate: { x: 47.6096, y: 13.0418 }, company: 'Speedy Transport', needsWheelchair: false },
     { id: 3, name: 'Alice Johnson', startCoordinate: { x: 47.60940, y: 13.04180 }, endCoordinate: { x: 47.6097, y: 13.0415 }, company: 'Speedy Transport', needsWheelchair: false  },
@@ -120,7 +120,7 @@ export class PlannerComponent {
     { id: 15, name: 'Charlotte Smith', startCoordinate: { x: 47.5311, y: 14.6625 }, endCoordinate: { x: 47.5314, y: 14.6622 }, company: 'Phoenix Transports' }*/
 ];
 
-   /*   people: any[] = [
+   /*   person: any[] = [
  { id: 1, name: 'John Doe', startCoordinate: { x: 47.6095, y: 13.0416 }, endCoordinate: { x: 47.6098, y: 13.0422 }, company: 'Speedy Transport' },
     { id: 2, name: 'Jane Smith', startCoordinate: { x: 47.6099, y: 13.0413 }, endCoordinate: { x: 47.6096, y: 13.0418 }, company: 'Speedy Transport' },
     { id: 3, name: 'Alice Johnson', startCoordinate: { x: 47.6094, y: 13.0418 }, endCoordinate: { x: 47.6097, y: 13.0415 }, company: 'Speedy Transport' },
@@ -176,7 +176,7 @@ export class PlannerComponent {
     const selectElement = document.querySelectorAll('.' + id);    
     const submitButton = document.querySelectorAll('.submit');    
 
-   // document.getElementById('vehicle-peopleList-' + vehicle.id)?.classList.toggle('.hide');
+   // document.getElementById('vehicle-personList-' + vehicle.id)?.classList.toggle('.hide');
 
     this.selectedCompany = vehicle.companyName;
 
@@ -205,7 +205,7 @@ export class PlannerComponent {
         submitButton[0].classList.add('hide');
         vehicleLabels.forEach(function (label) { label.parentElement?.parentElement?.classList.remove('shrunk');});
        
-        document.querySelectorAll('[class*="vehicle-peopleList"]').forEach(element => {
+        document.querySelectorAll('[class*="vehicle-personList"]').forEach(element => {
           element.innerHTML = '';
       });
       
@@ -227,8 +227,8 @@ onCompanySelected(){
 
 }
 
-getPeopleByCompany(companyName: string) {
-  return this.people.filter(person => person.company === companyName);
+getPersonByCompany(companyName: string) {
+  return this.person.filter(person => person.company === companyName);
 }
 
 getMapCoordinates(): [any[], boolean] {
@@ -237,7 +237,7 @@ getMapCoordinates(): [any[], boolean] {
     //console.log("Nothing sekected!");
      //console.dir(this.vehicles);
     // console.dir( this.vehicles[0].coordinates.x);
-    return [this.vehicles.map(vehicles => [vehicles.coordinates.x, vehicles.coordinates.y]), true];
+    return [this.vehicles.map(vehicles => [vehicles.startCoordinate.x, vehicles.startCoordinate.y]), true];
   } else {
     return [this.formattedRoutesArray, false];
   }
@@ -256,17 +256,17 @@ submitSelectedRoute(){
           coordinates: [step.location[1], step.location[0]],
           mainRoute: (this.selectedVehicle.id == routeObj.vehicle) ? true : false*/
 
-  //let peopleList = document.getElementById("vehicle-peopleList-" + this.selectedVehicle.id)?.getElementsByClassName("person-checkbox");
+  //let personList = document.getElementById("vehicle-personList-" + this.selectedVehicle.id)?.getElementsByClassName("person-checkbox");
 
-  var peopleList:any = this.getPeopleCheckboxValues("vehicle-peopleList-" + this.selectedVehicle.id);
+  var personList:any = this.getPersonCheckboxValues("vehicle-personList-" + this.selectedVehicle.id);
 
   var count:number = 0;
 
   if(this.selectedRoute){
   for(var step of this.selectedRoute.steps){ 
     var isHome = false;
-    //  console.log(peopleList);
-    for(var peop of peopleList){
+    //  console.log(personList);
+    for(var peop of personList){
 
     //  console.log(Number(peop.id) == Number(step.id));
     //  console.log(Number(peop.id));
@@ -303,22 +303,22 @@ submitSelectedRoute(){
   }
 }
 
-getPeopleCheckboxValues(peopleListId: string): { id: string; checked: boolean }[] {
-  const peopleCheckboxValues: { id: string; checked: boolean }[] = [];
-  const peopleList = document.getElementById(peopleListId);
-  if (peopleList) {
-      const checkboxes = peopleList.getElementsByClassName("person-checkbox");
+getPersonCheckboxValues(personListId: string): { id: string; checked: boolean }[] {
+  const personCheckboxValues: { id: string; checked: boolean }[] = [];
+  const personList = document.getElementById(personListId);
+  if (personList) {
+      const checkboxes = personList.getElementsByClassName("person-checkbox");
       for (let i = 0; i < checkboxes.length; i++) {
           const checkbox = checkboxes[i] as HTMLInputElement;
-          const id = checkbox.id.replace("checkbox-people-", "");
-          peopleCheckboxValues.push({
+          const id = checkbox.id.replace("checkbox-person-", "");
+          personCheckboxValues.push({
               id: id,
               checked: checkbox.checked
           });
       }
   }
 
-  return peopleCheckboxValues;
+  return personCheckboxValues;
 }
 
 
@@ -337,7 +337,7 @@ private waitForVehicles(): Promise<void> {
 }
 
 createVehicleList(companyName?: string){
-  const findPersonById = (id: number) => this.peopleDatabase.find(person => person.id === id);
+  const findPersonById = (id: number) => this.personDatabase.find(person => person.id === id);
   let vehicleList = document.getElementById("vehicle-list");
   let filteredVehicles = this.vehicles;
 
@@ -348,7 +348,7 @@ createVehicleList(companyName?: string){
 
 
   if(vehicleList != null){
-  let vehicleListHTML = '<style>.container{display:flex;flex-wrap:wrap;background-color:aqua;height:100vh;width:100%;margin:0!important;}.sidebar{position:relative;top:0;left:0;width:30%;height:100%;background-color:#fff;overflow-y:auto;padding:0 2rem;box-sizing:border-box;user-select:none;}.sidebar .fixedHeader{position:fixed;z-index:5;width:inherit;padding-right:5rem;height:7.5rem;background-color:#fff;}.sidebar .fixedHeader select{margin-right:5rem;}.sidebar .fixedHeader h2{text-transform:uppercase;font-weight:bolder;font-stretch:expanded;padding:0;margin-left:2rem;width:100%!important;}.map-outter-container{position:relative;flex:1;height:100%;background-color:#eeff00;overflow-y:auto;padding:0px!important;box-sizing:border-box;}.map-frame{height:100vh!important;}.map-container{box-sizing:border-box;position:relative!important;width:100%;}.sidebar{min-width:200px;}.sidebar li,.sidebar ul{list-style-type:none!important;padding-left:0!important;}.sidebar>ul{margin-top:10rem;}.vehicle-radio{margin-right:10px;}.vehicle-info{display:flex;flex-direction:column;line-height:1.2;}.vehicle-title{font-size:2rem;font-weight:300;color:#333;}.company-name{font-size:1.2rem;font-weight:900;color:#999;padding-left:0.1rem;}.seating-places{font-size:12px;color:#888;}.wheelchair-icon,.seating-icon{margin-top:5px;display:flex;font-size:1.6rem;padding-right:0.3rem;opacity:0.5;}.wheelchair-icon img,.seating-icon img{width:1.6rem;opacity:0.5;}.seating{display:flex;}.vehicle-label-outter{display:flex;align-items:center;cursor:pointer;transition:background-color 0.6s ease;flex-wrap:wrap;border-bottom:#ececec solid;}.vehicle-highlight{display:flex;align-items:center;cursor:pointer;transition:background-color 0.6s ease;flex-wrap:wrap;width:100%;padding:1.6rem 0 1.6rem 0;}.vehicle-highlight:hover{background-color:#d3d3d3!important;}.vehicle-highlight.selected .vehicle-icon{background-color:#277fc9;}.vehicle-label{display:flex;align-items:center;padding:1rem 2rem 1rem 1rem;cursor:pointer;transition:background-color 0.6s ease;}.vehicle-radio{display:none}.vehicle-selector{width:50px;height:50px;display:inline-block;border-radius:10px;overflow:hidden;cursor:pointer;transition:background-color 0.3s ease;}.vehicle-selector:hover{background-color:#f0f0f0;}.vehicle-icon{width:100%;height:100%;min-height:3.6rem;min-width:3.6rem;padding:1.2rem;border-radius:1.6rem;border:solid 0.3rem #e9e9e9;background-color:#f1f1f1;display:flex;align-items:center;}.selected .vehicle-selector{background-color:#4a90e2;}.vehicle-icon img{width:100%;opacity:1;max-width:3.6rem;max-height:3.6rem;}.vehicle-details{flex:1;}.selected .vehicle-selector{background-color:#4a90e2;}.selected .vehicle-icon img{filter:invert(100);}.shrunk{height:0!important;padding:0;opacity:0;overflow:hidden;transition:height 0.6s ease,padding 0.6s ease,opacity 0.3s ease-in;border:none!important;}.vehicle-label-outter:not(.shrunk){transition:height 0.6s ease,padding 0.6s ease,opacity 0.3s ease-in;}.shrunk>img{opacity:0.2;}.person-icon{width:auto;height:100%;min-height:3.6rem;min-width:3.6rem;padding:2rem 1.2rem 1.2rem 1.2rem;border-radius:1.6rem;border:solid 0.3rem #e9e9e9;background-color:#f1f1f1;display:flex;align-items:center;}.person-label{display:flex;align-items:center;cursor:pointer;padding:1.2rem 0;padding:1rem 0rem 1rem 0rem;width:100%!important;}.vehicle-label-outter .person-label:hover{background-color:#d3d3d3;}.people-list{width:100%!important;background-color:#fff;margin-bottom:-1.6rem;}.person-checkbox{padding:0 1rem 0 1rem;margin:0 1.5rem 0 1.5rem;}.person-checkbox[type=checkbox]{-ms-transform:scale(1.5);-moz-transform:scale(1.5);-webkit-transform:scale(1.5);-o-transform:scale(1.5);transform:scale(1.5);}.person-checkbox:checked+.person-icon img{filter:invert(100%);}.person-icon img{width:3.6rem;height:3.6rem;opacity:1;}.person-details{flex:1;}.person-title{font-size:2rem;font-weight:300;color:#333;}.person-details{flex:1;display:flex;flex-direction:column;}.person-name{font-size:1.6rem;font-weight:bold;color:#333;}.person-company{font-weight:900;font-size:1.2rem;color:#999;}.person-coordinates{font-size:1.2rem;color:#999;}.custom-select{appearance:none;-webkit-appearance:none;-moz-appearance:none;padding:8px;font-size:16px;border:1px solid #ccc;border-radius:5px;background-color:#f8f8f8;cursor:pointer;}.custom-select:focus{outline:none;border-color:#007bff;}.custom-select option{padding:0.8rem;font-size:1.6rem;cursor:pointer;}.fixedHeader{display:flex;align-items:center;}.submit{position:absolute;bottom:5rem;right:7.5rem;z-index:20000;}.hide{display:none;}.submit .btn.btn-primary{background:none;border:none;color:inherit;font:inherit;padding:0;cursor:pointer;outline:none;font-size:2rem;font-weight:600;color:#333;display:inline-block;font-size:2em;padding:1em 2em;margin-top:10rem;margin-bottom:6rem;-webkit-appearance:none;appearance:none;background-color:#f1f1f1;color:#333333;border-radius:1rem;border:none;cursor:pointer;position:relative;transition:transform ease-in 0.1s,box-shadow ease-in 0.25s;box-shadow:0 2px 25px rgba(255,255,255,0.5);}.submit .btn.btn-primary:focus{outline:0;}.submit .btn.btn-primary:active{transform:scale(0.9);background-color:darken(#f1f1f1,5%);box-shadow:0 2px 25px rgba(120,120,120,0.2);}.submit .btn.btn-primary.animate:before,.submit .btn.btn-primary.animate:after{position:absolute;content:``;display:block;width:140%;height:100%;left:-20%;z-index:-1000;transition:all ease-in-out 0.5s;background-repeat:no-repeat;}.submit .btn.btn-primary:before{display:none;top:-75%;background-image:radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,transparent 20%,#f1f1f1 20%,transparent 30%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,transparent 10%,#f1f1f1 15%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%);background-size:10% 10%,20% 20%,15% 15%,20% 20%,18% 18%,10% 10%,15% 15%,10% 10%,18% 18%;}.submit .btn.btn-primary:after{display:none;bottom:-75%;background-image:radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,transparent 10%,#f1f1f1 15%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%);background-size:15% 15%,20% 20%,18% 18%,20% 20%,15% 15%,10% 10%,20% 20%;}.submit .btn.btn-primary.animate:active:before{background-position:0% 80%,0% 20%,10% 40%,20% 0%,30% 30%,22% 50%,50% 50%,65% 20%,90% 30%;}.submit .btn.btn-primary.animate:active:after{background-position:0% 90%,20% 90%,45% 70%,60% 110%,75% 80%,95% 70%,110% 10%;background-size:0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%;}.submit .btn.btn-primary.animate:before{display:block;animation:topBubbles ease-in-out 0.75s forwards;}.submit .btn.btn-primary.animate:after{display:block;animation:bottomBubbles ease-in-out 0.75s forwards;}@keyframes topBubbles{0%{background-position:5% 90%,10% 90%,10% 90%,15% 90%,25% 90%,25% 90%,40% 90%,55% 90%,70% 90%;}50%{background-position:0% 80%,0% 20%,10% 40%,20% 0%,30% 30%,22% 50%,50% 50%,65% 20%,90% 30%;}100%{background-position:0% 70%,0% 10%,10% 30%,20% -10%,30% 20%,22% 40%,50% 40%,65% 10%,90% 20%;background-size:0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%;}}@keyframes bottomBubbles{0%{background-position:10% -10%,30% 10%,55% -10%,70% -10%,85% -10%,70% -10%,70% 0%;}50%{background-position:0% 80%,20% 80%,45% 60%,60% 100%,75% 70%,95% 60%,105% 0%;}100%{background-position:0% 90%,20% 90%,45% 70%,60% 110%,75% 80%,95% 70%,110% 10%;background-size:0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%;}}</style>';
+  let vehicleListHTML = '<style>.container{display:flex;flex-wrap:wrap;background-color:aqua;height:100vh;width:100%;margin:0!important;}.sidebar{position:relative;top:0;left:0;width:30%;height:100%;background-color:#fff;overflow-y:auto;padding:0 2rem;box-sizing:border-box;user-select:none;}.sidebar .fixedHeader{position:fixed;z-index:5;width:inherit;padding-right:5rem;height:7.5rem;background-color:#fff;}.sidebar .fixedHeader select{margin-right:5rem;}.sidebar .fixedHeader h2{text-transform:uppercase;font-weight:bolder;font-stretch:expanded;padding:0;margin-left:2rem;width:100%!important;}.map-outter-container{position:relative;flex:1;height:100%;background-color:#eeff00;overflow-y:auto;padding:0px!important;box-sizing:border-box;}.map-frame{height:100vh!important;}.map-container{box-sizing:border-box;position:relative!important;width:100%;}.sidebar{min-width:200px;}.sidebar li,.sidebar ul{list-style-type:none!important;padding-left:0!important;}.sidebar>ul{margin-top:10rem;}.vehicle-radio{margin-right:10px;}.vehicle-info{display:flex;flex-direction:column;line-height:1.2;}.vehicle-title{font-size:2rem;font-weight:300;color:#333;}.company-name{font-size:1.2rem;font-weight:900;color:#999;padding-left:0.1rem;}.seating-places{font-size:12px;color:#888;}.wheelchair-icon,.seating-icon{margin-top:5px;display:flex;font-size:1.6rem;padding-right:0.3rem;opacity:0.5;}.wheelchair-icon img,.seating-icon img{width:1.6rem;opacity:0.5;}.seating{display:flex;}.vehicle-label-outter{display:flex;align-items:center;cursor:pointer;transition:background-color 0.6s ease;flex-wrap:wrap;border-bottom:#ececec solid;}.vehicle-highlight{display:flex;align-items:center;cursor:pointer;transition:background-color 0.6s ease;flex-wrap:wrap;width:100%;padding:1.6rem 0 1.6rem 0;}.vehicle-highlight:hover{background-color:#d3d3d3!important;}.vehicle-highlight.selected .vehicle-icon{background-color:#277fc9;}.vehicle-label{display:flex;align-items:center;padding:1rem 2rem 1rem 1rem;cursor:pointer;transition:background-color 0.6s ease;}.vehicle-radio{display:none}.vehicle-selector{width:50px;height:50px;display:inline-block;border-radius:10px;overflow:hidden;cursor:pointer;transition:background-color 0.3s ease;}.vehicle-selector:hover{background-color:#f0f0f0;}.vehicle-icon{width:100%;height:100%;min-height:3.6rem;min-width:3.6rem;padding:1.2rem;border-radius:1.6rem;border:solid 0.3rem #e9e9e9;background-color:#f1f1f1;display:flex;align-items:center;}.selected .vehicle-selector{background-color:#4a90e2;}.vehicle-icon img{width:100%;opacity:1;max-width:3.6rem;max-height:3.6rem;}.vehicle-details{flex:1;}.selected .vehicle-selector{background-color:#4a90e2;}.selected .vehicle-icon img{filter:invert(100);}.shrunk{height:0!important;padding:0;opacity:0;overflow:hidden;transition:height 0.6s ease,padding 0.6s ease,opacity 0.3s ease-in;border:none!important;}.vehicle-label-outter:not(.shrunk){transition:height 0.6s ease,padding 0.6s ease,opacity 0.3s ease-in;}.shrunk>img{opacity:0.2;}.person-icon{width:auto;height:100%;min-height:3.6rem;min-width:3.6rem;padding:2rem 1.2rem 1.2rem 1.2rem;border-radius:1.6rem;border:solid 0.3rem #e9e9e9;background-color:#f1f1f1;display:flex;align-items:center;}.person-label{display:flex;align-items:center;cursor:pointer;padding:1.2rem 0;padding:1rem 0rem 1rem 0rem;width:100%!important;}.vehicle-label-outter .person-label:hover{background-color:#d3d3d3;}.person-list{width:100%!important;background-color:#fff;margin-bottom:-1.6rem;}.person-checkbox{padding:0 1rem 0 1rem;margin:0 1.5rem 0 1.5rem;}.person-checkbox[type=checkbox]{-ms-transform:scale(1.5);-moz-transform:scale(1.5);-webkit-transform:scale(1.5);-o-transform:scale(1.5);transform:scale(1.5);}.person-checkbox:checked+.person-icon img{filter:invert(100%);}.person-icon img{width:3.6rem;height:3.6rem;opacity:1;}.person-details{flex:1;}.person-title{font-size:2rem;font-weight:300;color:#333;}.person-details{flex:1;display:flex;flex-direction:column;}.person-name{font-size:1.6rem;font-weight:bold;color:#333;}.person-company{font-weight:900;font-size:1.2rem;color:#999;}.person-coordinates{font-size:1.2rem;color:#999;}.custom-select{appearance:none;-webkit-appearance:none;-moz-appearance:none;padding:8px;font-size:16px;border:1px solid #ccc;border-radius:5px;background-color:#f8f8f8;cursor:pointer;}.custom-select:focus{outline:none;border-color:#007bff;}.custom-select option{padding:0.8rem;font-size:1.6rem;cursor:pointer;}.fixedHeader{display:flex;align-items:center;}.submit{position:absolute;bottom:5rem;right:7.5rem;z-index:20000;}.hide{display:none;}.submit .btn.btn-primary{background:none;border:none;color:inherit;font:inherit;padding:0;cursor:pointer;outline:none;font-size:2rem;font-weight:600;color:#333;display:inline-block;font-size:2em;padding:1em 2em;margin-top:10rem;margin-bottom:6rem;-webkit-appearance:none;appearance:none;background-color:#f1f1f1;color:#333333;border-radius:1rem;border:none;cursor:pointer;position:relative;transition:transform ease-in 0.1s,box-shadow ease-in 0.25s;box-shadow:0 2px 25px rgba(255,255,255,0.5);}.submit .btn.btn-primary:focus{outline:0;}.submit .btn.btn-primary:active{transform:scale(0.9);background-color:darken(#f1f1f1,5%);box-shadow:0 2px 25px rgba(120,120,120,0.2);}.submit .btn.btn-primary.animate:before,.submit .btn.btn-primary.animate:after{position:absolute;content:``;display:block;width:140%;height:100%;left:-20%;z-index:-1000;transition:all ease-in-out 0.5s;background-repeat:no-repeat;}.submit .btn.btn-primary:before{display:none;top:-75%;background-image:radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,transparent 20%,#f1f1f1 20%,transparent 30%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,transparent 10%,#f1f1f1 15%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%);background-size:10% 10%,20% 20%,15% 15%,20% 20%,18% 18%,10% 10%,15% 15%,10% 10%,18% 18%;}.submit .btn.btn-primary:after{display:none;bottom:-75%;background-image:radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,transparent 10%,#f1f1f1 15%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%),radial-gradient(circle,#f1f1f1 20%,transparent 20%);background-size:15% 15%,20% 20%,18% 18%,20% 20%,15% 15%,10% 10%,20% 20%;}.submit .btn.btn-primary.animate:active:before{background-position:0% 80%,0% 20%,10% 40%,20% 0%,30% 30%,22% 50%,50% 50%,65% 20%,90% 30%;}.submit .btn.btn-primary.animate:active:after{background-position:0% 90%,20% 90%,45% 70%,60% 110%,75% 80%,95% 70%,110% 10%;background-size:0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%;}.submit .btn.btn-primary.animate:before{display:block;animation:topBubbles ease-in-out 0.75s forwards;}.submit .btn.btn-primary.animate:after{display:block;animation:bottomBubbles ease-in-out 0.75s forwards;}@keyframes topBubbles{0%{background-position:5% 90%,10% 90%,10% 90%,15% 90%,25% 90%,25% 90%,40% 90%,55% 90%,70% 90%;}50%{background-position:0% 80%,0% 20%,10% 40%,20% 0%,30% 30%,22% 50%,50% 50%,65% 20%,90% 30%;}100%{background-position:0% 70%,0% 10%,10% 30%,20% -10%,30% 20%,22% 40%,50% 40%,65% 10%,90% 20%;background-size:0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%;}}@keyframes bottomBubbles{0%{background-position:10% -10%,30% 10%,55% -10%,70% -10%,85% -10%,70% -10%,70% 0%;}50%{background-position:0% 80%,20% 80%,45% 60%,60% 100%,75% 70%,95% 60%,105% 0%;}100%{background-position:0% 90%,20% 90%,45% 70%,60% 110%,75% 80%,95% 70%,110% 10%;background-size:0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%;}}</style>';
  // console.log(this.vehicles);
 
   for(let vehicleObj of filteredVehicles){
@@ -387,9 +387,9 @@ createVehicleList(companyName?: string){
       </div>
     </div>
     
-    <div class="people-list" *ngIf="selectedVehicle">
+    <div class="person-list" *ngIf="selectedVehicle">
     <!--<h3>${vehicleObj.CompanyName} Employees:</h3>-->
-    <ul id="vehicle-peopleList-${vehicleObj.id}" class="vehicle-peopleList">
+    <ul id="vehicle-personList-${vehicleObj.id}" class="vehicle-personList">
         
     </ul>
 </div>
@@ -433,13 +433,14 @@ createVehicleList(companyName?: string){
 
 async getFilteredVehicles(): Promise<VehicleLocal[]>  {
 
-  console.log(this.peopleDatabase);
+  console.log(this.personDatabase);
 
   await this.waitForVehicles();
 
-  console.log(this.peopleDatabase);
+  console.log(this.personDatabase);
+  console.log(this.vehicles);
 
-  this.people = this.peopleDatabase;
+  this.person = this.personDatabase;
 
   this.getMapCoordinates();
 
@@ -501,7 +502,7 @@ if(this.selectedVehicle.id != undefined)
  
     this.selectedRoute = displayRoute;
 
-    this.createPeopleList(displayRoute, this.selectedVehicle.id);
+    this.createPersonList(displayRoute, this.selectedVehicle.id);
     
     /// Here
 /*  public routesData = [
@@ -550,18 +551,18 @@ if(this.selectedVehicle.id != undefined)
     return routesArray;
   }
 
-  createPeopleList(route: any, vehicleId: number){
+  createPersonList(route: any, vehicleId: number){
 
-    console.log("People List is called");
+    console.log("Person List is called");
 
-    const findPersonById = (id: number) => this.peopleDatabase.find(person => person.id === id);
-    let peopleList = document.getElementById("vehicle-peopleList-" + vehicleId);
+    const findPersonById = (id: number) => this.personDatabase.find(person => person.id === id);
+    let personList = document.getElementById("vehicle-personList-" + vehicleId);
    // console.log(vehicleId);
-   // console.log(peopleList);
+   // console.log(personList);
 
-    if(peopleList != null){
+    if(personList != null){
 
-    let peopleListHTML = '<style>.person-icon { width: auto; height: 100%; min-height: 3.6rem; min-width: 3.6rem; padding: 2rem 1.2rem 1.2rem 1.2rem; border-radius: 1.6rem; border: solid 0.3rem #E9e9e9; background-color: #F1F1F1; display: flex; align-items: center;margin: 0 2rem 0 2rem; }    .person-label { display: flex; align-items: center; cursor: pointer; padding: 1.2rem 0; padding: 1rem 0rem 1rem 0rem; width: 100% !important; } .vehicle-label-outter .person-label:hover{ background-color: #D3D3D3; }.people-list{ width: 100% !important; background-color: #ffffff; margin-bottom: -1.6rem; }.person-checkbox { padding: 0 1rem 0 1rem; margin: 0 1.5rem 0 1.5rem; }.person-checkbox[type=checkbox] { -ms-transform: scale(1.5); -moz-transform: scale(1.5); -webkit-transform: scale(1.5); -o-transform: scale(1.5); transform: scale(1.5); }.person-checkbox:checked + .person-icon img { filter: invert(100%); }.person-icon img { width: 3.6rem; height: 3.6rem; opacity: 1; }.person-details { flex: 1; }.person-title { font-size: 2rem; font-weight: 300; color: #333; }.person-details { flex: 1; display: flex; flex-direction: column; }.person-name { font-size: 1.6rem; font-weight: bold; color: #333; }.person-company{ font-weight: 900; font-size: 1.2rem; color: #999; }.person-coordinates { font-size: 1.2rem; color: #999; }</style>';
+    let personListHTML = '<style>.person-icon { width: auto; height: 100%; min-height: 3.6rem; min-width: 3.6rem; padding: 2rem 1.2rem 1.2rem 1.2rem; border-radius: 1.6rem; border: solid 0.3rem #E9e9e9; background-color: #F1F1F1; display: flex; align-items: center;margin: 0 2rem 0 2rem; }    .person-label { display: flex; align-items: center; cursor: pointer; padding: 1.2rem 0; padding: 1rem 0rem 1rem 0rem; width: 100% !important; } .vehicle-label-outter .person-label:hover{ background-color: #D3D3D3; }.person-list{ width: 100% !important; background-color: #ffffff; margin-bottom: -1.6rem; }.person-checkbox { padding: 0 1rem 0 1rem; margin: 0 1.5rem 0 1.5rem; }.person-checkbox[type=checkbox] { -ms-transform: scale(1.5); -moz-transform: scale(1.5); -webkit-transform: scale(1.5); -o-transform: scale(1.5); transform: scale(1.5); }.person-checkbox:checked + .person-icon img { filter: invert(100%); }.person-icon img { width: 3.6rem; height: 3.6rem; opacity: 1; }.person-details { flex: 1; }.person-title { font-size: 2rem; font-weight: 300; color: #333; }.person-details { flex: 1; display: flex; flex-direction: column; }.person-name { font-size: 1.6rem; font-weight: bold; color: #333; }.person-company{ font-weight: 900; font-size: 1.2rem; color: #999; }.person-coordinates { font-size: 1.2rem; color: #999; }</style>';
 
 
     console.log(route);
@@ -569,7 +570,7 @@ if(this.selectedVehicle.id != undefined)
 
 
     if(!route){
-      peopleListHTML +=  `
+      personListHTML +=  `
       <li>
           <label class="person-label"><div class="person-icon">
                   <img src="../../assets/user-solid.svg" alt="Person Icon">
@@ -589,7 +590,7 @@ if(this.selectedVehicle.id != undefined)
       //  console.log(person);
 
 
-        peopleListHTML +=  `
+        personListHTML +=  `
         <li>
             <label class="person-label">
                 <div class="person-icon">
@@ -598,10 +599,11 @@ if(this.selectedVehicle.id != undefined)
                 <div class="person-details">
                     <span class="person-name">` + person.name + `</span>
                     <span class="person-company">`+ person.company + `</span>
+                     <span class="person-company">`+ person.company + `</span>
                     <span class="person-coordinates">`+ person.startCoordinate.x + `, `+ person.startCoordinate.y + `</span>
                 </div>
                 <div class="checkbox">
-                    <input type="checkbox" name="person" class="person-checkbox" [value]="person_selection" id="checkbox-people-`+ person.id + `" checked>
+                    <input type="checkbox" name="person" class="person-checkbox" [value]="person_selection" id="checkbox-person-`+ person.id + `" checked>
                 </div>
             </label>
         </li>`;
@@ -609,40 +611,40 @@ if(this.selectedVehicle.id != undefined)
       }
     }
   }
-    peopleList.innerHTML = peopleListHTML;
+    personList.innerHTML = personListHTML;
     }
   }
 
 
-createRoutes(vehicles: VehicleLocal[], people: PersonLocal[]): Route[] {
+createRoutes(vehicles: VehicleLocal[], person: PersonLocal[]): Route[] {
   const routes: Route[] = [];
 
-  // Group people by company
-  const peopleByCompany: {[key: string]: PersonLocal[]} = {};
-  people.forEach(person => {
-      if (!peopleByCompany[person.company]) {
-          peopleByCompany[person.company] = [];
+  // Group person by company
+  const personByCompany: {[key: string]: PersonLocal[]} = {};
+  person.forEach(person => {
+      if (!personByCompany[person.company]) {
+          personByCompany[person.company] = [];
       }
-      peopleByCompany[person.company].push(person);
+      personByCompany[person.company].push(person);
   });
 
-  // Assign people to vehicles
+  // Assign person to vehicles
   vehicles.forEach(vehicle => {
-      const assignedPeople: PersonLocal[] = [];
-      const peopleForCompany = peopleByCompany[vehicle.CompanyName] || [];
-      peopleForCompany.forEach(person => {
+      const assignedPerson: PersonLocal[] = [];
+      const personForCompany = personByCompany[vehicle.CompanyName] || [];
+      personForCompany.forEach(person => {
           // Check if the vehicle can transport wheelchairs or if the person doesn't require one
           if (vehicle.canTransportWheelchairs || !person.needsWheelchair) {
-              assignedPeople.push(person);
+              assignedPerson.push(person);
           }
       });
 
       // Create route for the vehicle
       const route: Route = {
           vehicle_id: vehicle.id,
-          start_location: [vehicle.coordinates.x, vehicle.coordinates.y],
-          end_location: [vehicle.coordinates.x, vehicle.coordinates.y],
-          people: assignedPeople
+          start_location: [vehicle.startCoordinate.x, vehicle.startCoordinate.y],
+          end_location: [vehicle.endCoordinate.x, vehicle.endCoordinate.y],
+          person: assignedPerson
       };
       routes.push(route);
   });
@@ -695,8 +697,8 @@ async calculateRoute(){
   let Optimization = new Openrouteservice.Optimization({api_key: "5b3ce3597851110001cf6248d4673641728346c68523ae8c4c8158aa"});
 
   
-  const selectedPeople = this.people.filter(person => person.company === this.selectedVehicle.CompanyName);
-  const shipmentsForOptimization = selectedPeople.map(person => ({
+  const selectedPerson = this.person.filter(person => person.company === this.selectedVehicle.CompanyName);
+  const shipmentsForOptimization = selectedPerson.map(person => ({
     amount: [1], 
     skills: [(person.needsWheelchair ? 2 : 1)],
     pickup: {
@@ -722,8 +724,8 @@ async calculateRoute(){
     id: vehicle.id,
     description: vehicle.VehicleDescription + " " + vehicle.CompanyName + " " + vehicle.id + " " + Math.floor((Math.random() * 9999999999) + 1),
     profile: 'driving-car',
-    start: [vehicle.coordinates.y, vehicle.coordinates.x],
-    end: [vehicle.coordinates.y, vehicle.coordinates.x],
+    start: [vehicle.startCoordinate.y, vehicle.startCoordinate.x],
+    end: [vehicle.endCoordinate.y, vehicle.endCoordinate.x],
     capacity: [vehicle.seatingPlaces],
     skills: (vehicle.canTransportWheelchairs ? [1, 2] : [1]),
   }));
@@ -745,10 +747,10 @@ try {
   }catch (error) {
     console.error("Error occurred while calculating route:", error);
 
-    console.log("vehicle-peopleList-" + this.selectedVehicle.id);
-    let peopleList = document.getElementById("vehicle-peopleList-" + this.selectedVehicle.id);
+    console.log("vehicle-personList-" + this.selectedVehicle.id);
+    let personList = document.getElementById("vehicle-personList-" + this.selectedVehicle.id);
     
-    let peopleListHTML =  `
+    let personListHTML =  `
     <li>
         <label class="person-label"><div class="person-icon">
                 <img src="../../assets/user-solid.svg" alt="Person Icon">
@@ -758,7 +760,7 @@ try {
             </div>
         </label>
     </li>`;
-    peopleList!.innerHTML = peopleListHTML;
+    personList!.innerHTML = personListHTML;
     return null;
   }
   return null;
@@ -776,34 +778,34 @@ vehicles$!: Observable<Vehicle[]>;
 
   ngOnInit(): void {
   //{ id: 4, name: 'Bob Brown', startCoordinate: { x: 48.20800, y: 16.37170 }, endCoordinate: { x: 48.2083, y: 16.3723 }, company: 'Starlight Rides', needsWheelchair: true }
-    this.personService.getAllPeople().subscribe(
+    this.personService.getAllPerson().subscribe(
       (data: any[]) => { 
-        this.peopleDatabase = data.map(people => ({
-          id: people.id,
-          name: people.name,
+        this.personDatabase = data.map(person => ({
+          id: person.id,
+          name: person.name,
           startCoordinate: {
-            x: parseFloat(people.startCoordinate.substring(1, people.startCoordinate.indexOf(','))),
-            y: parseFloat(people.startCoordinate.substring(people.startCoordinate.indexOf(',') + 1, people.startCoordinate.length - 1))      
+            x: parseFloat(person.startCoordinate.substring(1, person.startCoordinate.indexOf(','))),
+            y: parseFloat(person.startCoordinate.substring(person.startCoordinate.indexOf(',') + 1, person.startCoordinate.length - 1))      
           },
           endCoordinate: { 
-            x: parseFloat(people.endCoordinate.substring(1, people.endCoordinate.indexOf(','))),
-            y: parseFloat(people.endCoordinate.substring(people.endCoordinate.indexOf(',') + 1, people.endCoordinate.length - 1))      
+            x: parseFloat(person.endCoordinate.substring(1, person.endCoordinate.indexOf(','))),
+            y: parseFloat(person.endCoordinate.substring(person.endCoordinate.indexOf(',') + 1, person.endCoordinate.length - 1))      
            },
-          company: people.company,
-          needsWheelchair: people.wheelchair !== undefined ? people.wheelchair : false
+          company: person.company,
+          needsWheelchair: person.wheelchair !== undefined ? person.wheelchair : false
         }));
       },
-      (error) => { console.error('Error fetching people data:', error);});
-      this.people = this.peopleDatabase;
+      (error) => { console.error('Error fetching person data:', error);});
+      this.person = this.personDatabase;
 
   
       /*
-      this.personService.getAllPeople().subscribe(
+      this.personService.getAllPerson().subscribe(
         (data: any[]) => { 
-          this.peopleDatabase = data; 
+          this.personDatabase = data; 
         },
-        (error) => { console.error('Error fetching people data:', error);});
-        this.people = this.peopleDatabase;
+        (error) => { console.error('Error fetching person data:', error);});
+        this.person = this.personDatabase;
     */
 
     this.vehicleService.getAllVehicles().subscribe(
@@ -812,16 +814,20 @@ vehicles$!: Observable<Vehicle[]>;
           this.vehicles = data.map(vehicle => ({
             id: vehicle.id,
             CompanyName: vehicle.companyName,
-            coordinates: { 
-              x: parseFloat(vehicle.coordinate.substring(1, vehicle.coordinate.indexOf(','))),
-              y: parseFloat(vehicle.coordinate.substring(vehicle.coordinate.indexOf(',') + 1, vehicle.coordinate.length - 1))      
+            startCoordinate: { 
+              x: parseFloat(vehicle.startCoordinate.substring(1, vehicle.startCoordinate.indexOf(','))),
+              y: parseFloat(vehicle.startCoordinate.substring(vehicle.startCoordinate.indexOf(',') + 1, vehicle.startCoordinate.length - 1))      
+             },
+             endCoordinate: { 
+              x: parseFloat(vehicle.endCoordinate.substring(1, vehicle.endCoordinate.indexOf(','))),
+              y: parseFloat(vehicle.endCoordinate.substring(vehicle.endCoordinate.indexOf(',') + 1, vehicle.endCoordinate.length - 1))      
              },
             canTransportWheelchairs: (vehicle.canTransportWheelchairs == 1) ? true : false,
             VehicleDescription: vehicle.vehicleDescription,
             seatingPlaces: vehicle.seatingPlaces
           }));
          },
-      (error) => { console.error('Error fetching people data:', error);});
+      (error) => { console.error('Error fetching person data:', error);});
 
       this.getFilteredVehicles();
 

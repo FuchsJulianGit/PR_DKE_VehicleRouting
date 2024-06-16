@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { PersonService } from './person.service'; // Assuming the service file is named people.service.ts
+import { PersonService } from './person.service'; // Assuming the service file is named person.service.ts
 
-describe('PeopleService', () => {
+describe('PersonService', () => {
   let service: PersonService;
 
   beforeEach(() => {

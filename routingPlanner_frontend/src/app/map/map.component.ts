@@ -234,7 +234,7 @@ private isMarkerDrawn(markerCoord: any): boolean {
           },
           router: L.Routing.osrmv1({
             serviceUrl: "http://localhost:5000/route/v1",
-          })
+          }) // Remove {servceUrl...} in case OSMR is not working - this is however not suitable for production
         }).addTo(this.map);
 
       const routingControlContainer = this.innerRoute[index].getContainer();

@@ -8,8 +8,8 @@ import { MapComponent } from './map/map.component';
 import { PlannerComponent } from './planner/planner.component';
 
 export const routes: Routes = [
-   { path: '', component: RoutePointListComponent},
-   { path: 'login', component: LoginComponent },
+   { path: '', component: PlannerComponent},
+   /*{ path: 'login', component: LoginComponent },*/
    { path: 'map', component: MapComponent },
    { path: 'planner', component: PlannerComponent }  
 ];
