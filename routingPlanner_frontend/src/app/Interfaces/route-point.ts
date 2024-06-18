@@ -17,19 +17,19 @@ export interface Vehicle {
     seatingPlaces: number;
   }
   
-  export interface Person {
+  /*export interface Person {
     id: number;
     name: string;
     startCoordinate: string;
     endCoordinate: string;
     company: string;
     needsWheelchair?: boolean;
-  }
+  }*/
   
 
 
 //PersonNew
-/*export class Person {
+export class Person {
   id?: number;
   gender: string;
   titel: string;
@@ -41,6 +41,7 @@ export interface Vehicle {
   startCoordinates: Coordinates;
   targetCoordinates: Coordinates;
   wheelchair: boolean;
+  transportProvider?: TransportProvider;
 
   constructor(
     gender: string,
@@ -52,7 +53,8 @@ export interface Vehicle {
     targetAddress: Address,
     startCoordinates: Coordinates,
     targetCoordinates: Coordinates,
-    wheelchair: boolean
+    wheelchair: boolean,
+    transportProvider?: TransportProvider
   ) {
     this.gender = gender;
     this.titel = titel;
@@ -64,22 +66,32 @@ export interface Vehicle {
     this.startCoordinates = startCoordinates;
     this.targetCoordinates = targetCoordinates;
     this.wheelchair = wheelchair;
+    this.transportProvider = transportProvider;
   }
 }
 
 
-export class Address {
-  streetName?: string;
-  doorNumber?: string;
-  zipcode?: string;
-  city?: string;
+export interface Address {
+  id: number;
+  streetName: string;
+  doorNumber: string;
+  zipcode: string;
+  city: string;
 }
 
-export class Coordinates {
-  longitude?: string;
-  latitude?: string;
+export interface Coordinates {
+  id: number;
+  longitude: number | null;
+  latitude: number | null;
 }
-*/
+
+interface TransportProvider {
+  companyName: string;
+  review: string;
+  companyAddress: Address;
+  companyCoordinates?: Coordinates;
+}
+
 
 /*export interface RoutePoint {
     id: number;

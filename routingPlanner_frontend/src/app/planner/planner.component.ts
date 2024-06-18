@@ -18,28 +18,59 @@ let orsDirections = new Openrouteservice.Directions({ api_key: "XYZ"});
 
 
 //Create Routes
-interface Coordinate {
+/*interface Coordinate {
   x: number;
   y: number;
+}*/
+
+//NewCoordinates
+interface Coordinates {
+  id: number;
+  longitude: number | 0;
+  latitude: number | 0;
 }
 
 interface VehicleLocal {
   id: number;
   CompanyName: string;
-  startCoordinate: Coordinate;
-  endCoordinate: Coordinate;
+  startCoordinate: Coordinates;
+  endCoordinate: Coordinates;
   canTransportWheelchairs: boolean;
   VehicleDescription: 'Thunderbolt 5000';
   seatingPlaces: number;
 }
 
-interface PersonLocal {
+/*interface PersonLocal {
   id: number;
   name: string;
-  startCoordinate: Coordinate;
-  endCoordinate: Coordinate;
+  startCoordinate: Coordinates;
+  endCoordinate: Coordinates;
   company: string;
   needsWheelchair: boolean;
+}*/
+
+//New PersonLocal
+interface PersonLocal {
+  id?: number;
+  gender: string;
+  titel: string;
+  firstName: string;
+  lastName: string;
+  birthday: Date;
+  startAddress: Address;
+  targetAddress: Address;
+  startCoordinates: Coordinates;
+  targetCoordinates: Coordinates;
+  wheelchair: boolean;
+  transportProvider?: TransportProvider;
+}
+
+interface Address {
+  id: number;
+  streetName: string;
+  doorNumber: string;
+  zipcode: string;
+  city: string;
 }
 
 interface Route {
@@ -47,6 +78,13 @@ interface Route {
   start_location: number[];
   end_location: number[];
   person: PersonLocal[];
+}
+
+interface TransportProvider {
+  companyName: string;
+  review: string;
+  companyAddress: Address;
+  companyCoordinates?: Coordinates;
 }
 
 interface RouteFormat {
@@ -234,11 +272,13 @@ getPersonByCompany(companyName: string) {
 getMapCoordinates(): [any[], boolean] {
   const value = true;
   if (this.selectedVehicle == null) {
-    //console.log("Nothing sekected!");
-     //console.dir(this.vehicles);
-    // console.dir( this.vehicles[0].coordinates.x);
+    // console.log("Nothing sekected!");
+    // console.dir(this.vehicles);
+  
+     //Change WITH NEW VEHILCES!
     return [this.vehicles.map(vehicles => [vehicles.startCoordinate.x, vehicles.startCoordinate.y]), true];
   } else {
+    // console.log("Soemthing sekected!");
     return [this.formattedRoutesArray, false];
   }
 
@@ -597,10 +637,10 @@ if(this.selectedVehicle.id != undefined)
                     <img src="../../assets/user-solid.svg" alt="Person Icon">
                 </div>
                 <div class="person-details">
-                    <span class="person-name">` + person.name + `</span>
-                    <span class="person-company">`+ person.company + `</span>
-                     <span class="person-company">`+ person.company + `</span>
-                    <span class="person-coordinates">`+ person.startCoordinate.x + `, `+ person.startCoordinate.y + `</span>
+                    <span class="person-name">` + person.firstName + " " + person.lastName + `</span>
+                    <span class="person-coordinates">`+ (person.transportProvider || "No company assigned") + `</span>
+                     <span class="person-company">`+ person.targetAddress.streetName + " " + person.targetAddress.doorNumber + " " + person.targetAddress.city + `</span>
+                    <span class="person-coordinates">`+ person.startCoordinate.longitude + `, `+ person.startCoordinate.latitude + `</span>
                 </div>
                 <div class="checkbox">
                     <input type="checkbox" name="person" class="person-checkbox" [value]="person_selection" id="checkbox-person-`+ person.id + `" checked>
@@ -622,11 +662,14 @@ createRoutes(vehicles: VehicleLocal[], person: PersonLocal[]): Route[] {
   // Group person by company
   const personByCompany: {[key: string]: PersonLocal[]} = {};
   person.forEach(person => {
-      if (!personByCompany[person.company]) {
-          personByCompany[person.company] = [];
+    const companyName = person.transportProvider?.companyName || '';
+      if (!personByCompany[companyName]) {
+          personByCompany[companyName] = [];
       }
-      personByCompany[person.company].push(person);
+      personByCompany[companyName].push(person);
   });
+  console.log("WORKS??");
+  console.log(personByCompany);
 
   // Assign person to vehicles
   vehicles.forEach(vehicle => {
@@ -634,7 +677,7 @@ createRoutes(vehicles: VehicleLocal[], person: PersonLocal[]): Route[] {
       const personForCompany = personByCompany[vehicle.CompanyName] || [];
       personForCompany.forEach(person => {
           // Check if the vehicle can transport wheelchairs or if the person doesn't require one
-          if (vehicle.canTransportWheelchairs || !person.needsWheelchair) {
+          if (vehicle.canTransportWheelchairs || !person.wheelchair) {
               assignedPerson.push(person);
           }
       });
@@ -642,8 +685,8 @@ createRoutes(vehicles: VehicleLocal[], person: PersonLocal[]): Route[] {
       // Create route for the vehicle
       const route: Route = {
           vehicle_id: vehicle.id,
-          start_location: [vehicle.startCoordinate.x, vehicle.startCoordinate.y],
-          end_location: [vehicle.endCoordinate.x, vehicle.endCoordinate.y],
+          start_location: [vehicle.startCoordinate.longitude, vehicle.startCoordinate.latitude],
+          end_location: [vehicle.endCoordinate.longitude, vehicle.endCoordinate.latitude],
           person: assignedPerson
       };
       routes.push(route);
@@ -697,28 +740,88 @@ async calculateRoute(){
   let Optimization = new Openrouteservice.Optimization({api_key: "5b3ce3597851110001cf6248d4673641728346c68523ae8c4c8158aa"});
 
   
-  const selectedPerson = this.person.filter(person => person.company === this.selectedVehicle.CompanyName);
+  //const selectedPerson = this.person.filter(person => person.company === this.selectedVehicle.CompanyName);
+  let selectedPerson = this.person;
+  //Switch comments to select based on companyssss
+  console.log(selectedPerson);
+
+
+
+selectedPerson = selectedPerson.filter(e => {
+    const startLatitude = e.startCoordinate.latitude;
+    const endLatitude = e.endCoordinate.latitude;
+    const startLongitude = e.startCoordinate.longitude;
+    const endLongitude = e.endCoordinate.longitude;
+
+    const isValid = (startLatitude >= 45 && startLatitude <= 50) &&
+                    (endLatitude >= 45 && endLatitude <= 50) &&
+                    (startLongitude >= 9 && startLongitude <= 18) &&
+                    (endLongitude >= 9 && endLongitude <= 18);
+
+    if (!isValid) {
+      console.error('Invalid person coordinates detected:', {
+        startLatitude,
+        endLatitude,
+        startLongitude,
+        endLongitude,
+        personId: e.id
+      });
+    }
+
+    return isValid;
+  });
+
+  console.log(selectedPerson);
+
+
+
   const shipmentsForOptimization = selectedPerson.map(person => ({
     amount: [1], 
-    skills: [(person.needsWheelchair ? 2 : 1)],
+    skills: [(person.wheelchair ? 2 : 1)],
     pickup: {
         id: person.id, 
         service: 300,
-        location: [person.startCoordinate.y, person.startCoordinate.x] 
+        location: [person.startCoordinate.longitude, person.startCoordinate.latitude] 
     },
     delivery: {
         id: person.id+1000, 
         service: 300, 
-        location: [person.endCoordinate.y, person.endCoordinate.x]
+        location: [person.endCoordinate.longitude, person.endCoordinate.latitude]
     }
   }));
   
-  const selectedVehicles = this.vehicles.filter(vehicle => vehicle.CompanyName === this.selectedVehicle.CompanyName);
- 
+  //const selectedVehicles = this.vehicles.filter(vehicle => vehicle.CompanyName === this.selectedVehicle.CompanyName);
+  let selectedVehicles = this.vehicles;
   console.log(selectedVehicles);
 
+  selectedVehicles = selectedVehicles.filter(e => {
+    const startLatitude = e.startCoordinate.x != null ? e.startCoordinate.x : 0;
+    const endLatitude = e.endCoordinate.x != null ? e.endCoordinate.x : 0;
+    const startLongitude = e.startCoordinate.y != null ? e.startCoordinate.y : 0;
+    const endLongitude = e.endCoordinate.y != null ? e.endCoordinate.y : 0;
 
-// return [this.vehicles.map(vehicles => [vehicles.coordinates.x, vehicles.coordinates.y]), true];
+    const isValid = (startLatitude >= 45 && startLatitude <= 50) &&
+                    (endLatitude >= 45 && endLatitude <= 50) &&
+                    (startLongitude >= 9 && startLongitude <= 18) &&
+                    (endLongitude >= 9 && endLongitude <= 18);
+
+    if (!isValid) {
+      console.error('Invalid vehicle coordinates detected:', {
+        startLatitude,
+        endLatitude,
+        startLongitude,
+        endLongitude,
+        personId: e.id
+      });
+    }
+
+    return isValid;
+  });
+
+
+// return [this.vehicles.map(vehicles => [vehicles.coordinates.longitude, vehicles.coordinates.latitude]), true];
+
+console.log(selectedVehicles);
 
   const vehiclesForOptimization = selectedVehicles.map(vehicle => ({
     id: vehicle.id,
@@ -727,6 +830,7 @@ async calculateRoute(){
     start: [vehicle.startCoordinate.y, vehicle.startCoordinate.x],
     end: [vehicle.endCoordinate.y, vehicle.endCoordinate.x],
     capacity: [vehicle.seatingPlaces],
+    max_tasks: 10,
     skills: (vehicle.canTransportWheelchairs ? [1, 2] : [1]),
   }));
 
@@ -778,7 +882,7 @@ vehicles$!: Observable<Vehicle[]>;
 
   ngOnInit(): void {
   //{ id: 4, name: 'Bob Brown', startCoordinate: { x: 48.20800, y: 16.37170 }, endCoordinate: { x: 48.2083, y: 16.3723 }, company: 'Starlight Rides', needsWheelchair: true }
-    this.personService.getAllPerson().subscribe(
+  /*  this.personService.getAllPerson().subscribe(
       (data: any[]) => { 
         this.personDatabase = data.map(person => ({
           id: person.id,
@@ -795,8 +899,68 @@ vehicles$!: Observable<Vehicle[]>;
           needsWheelchair: person.wheelchair !== undefined ? person.wheelchair : false
         }));
       },
-      (error) => { console.error('Error fetching person data:', error);});
+      (error) => { console.error('Error fetching person data:', error);});*/
+
+      this.personService.getAllPerson().subscribe(
+        (data: any[]) => { 
+            this.personDatabase = data.map(person => ({
+             
+              id: person.id,
+              gender: person.gender,
+              titel: person.titel,
+              firstName: person.firstName,
+              lastName: person.lastName,
+              birthday: new Date(person.birthday),
+              startAddress: {
+                id: person.startAddress.id,
+                streetName: person.startAddress.streetName,
+                doorNumber: person.startAddress.doorNumber,
+                zipcode: person.startAddress.zipcode,
+                city: person.startAddress.city
+              },
+              targetAddress: {
+                id: person.targetAddress.id,
+                streetName: person.targetAddress.streetName,
+                doorNumber: person.targetAddress.doorNumber,
+                zipcode: person.targetAddress.zipcode,
+                city: person.targetAddress.city
+              },
+              startCoordinate: {
+                id: person.startCoordinates.id,
+                longitude: parseFloat(person.startCoordinates.longitude),
+                latitude: parseFloat(person.startCoordinates.latitude),
+              },
+              endCoordinate: {
+                id: person.targetCoordinates.id,
+                longitude: parseFloat(person.targetCoordinates.longitude),
+                latitude: parseFloat(person.targetCoordinates.latitude),
+              },
+              wheelchair: person.wheelchair !== undefined ? person.wheelchair : false,
+              transportProvider: person.transportProvider ? {
+                companyName: person.transportProvider.companyName,
+                review: person.transportProvider.review,
+                companyAddress: {
+                  id: person.transportProvider.companyAddress.id,
+                  streetName: person.transportProvider.companyAddress.streetName,
+                  doorNumber: person.transportProvider.companyAddress.doorNumber,
+                  zipcode: person.transportProvider.companyAddress.zipcode,
+                  city: person.transportProvider.companyAddress.city
+                },
+                companyCoordinates: person.transportProvider.companyCoordinates ? {
+                  id: person.transportProvider.companyCoordinates.id,
+                  longitude: parseFloat(person.transportProvider.companyCoordinates.longitude),
+                  latitude: parseFloat(person.transportProvider.companyCoordinates.latitude),
+                } : undefined
+              } : undefined
+            }));
+            this.person = this.personDatabase;
+          },
+        (error) => { console.error('Error fetching person data:', error);});
+
       this.person = this.personDatabase;
+
+      
+      
 
   
       /*
@@ -814,6 +978,8 @@ vehicles$!: Observable<Vehicle[]>;
           this.vehicles = data.map(vehicle => ({
             id: vehicle.id,
             CompanyName: vehicle.companyName,
+
+            
             startCoordinate: { 
               x: parseFloat(vehicle.startCoordinate.substring(1, vehicle.startCoordinate.indexOf(','))),
               y: parseFloat(vehicle.startCoordinate.substring(vehicle.startCoordinate.indexOf(',') + 1, vehicle.startCoordinate.length - 1))      
@@ -828,6 +994,8 @@ vehicles$!: Observable<Vehicle[]>;
           }));
          },
       (error) => { console.error('Error fetching person data:', error);});
+
+      this.vehicleService
 
       this.getFilteredVehicles();
 
@@ -848,3 +1016,5 @@ vehicles$!: Observable<Vehicle[]>;
   }*/
 
 }
+
+

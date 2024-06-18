@@ -34,6 +34,12 @@ public class RouteService {
         return "Point removed " + id;
     }
 
+    public String deleteRoutePointsByDescription(String description) {
+        System.out.print("Delete");
+        repository.deleteByDescription(description);
+        return "Route removed " + description;
+    }
+
     public RoutePoint updateRoutePoint(RoutePoint routePoint) {
         /*RoutePoint existingRoutePoint= repository.findById(routePoint.getId()).orElse(null);
         existingRoutePoint.setSeq(routePoint.getSeq());

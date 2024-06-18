@@ -3,10 +3,11 @@ package com.dke.routingPlanner.controller;
 import com.dke.routingPlanner.entities.RoutePoint;
 import com.dke.routingPlanner.services.RouteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Random;
 
 @RestController
 public class RoutingPlannerController {
@@ -15,49 +16,89 @@ public class RoutingPlannerController {
     private RouteService routeService;
 
     @PostMapping("/addRoutePoint")
-    public RoutePoint addRoutePoint(@RequestBody RoutePoint routePoint) {
-        return routeService.saveRoutePoint(routePoint);
+    public ResponseEntity<?> addRoutePoint(@RequestBody RoutePoint routePoint) {
+        try {
+            RoutePoint savedRoutePoint = routeService.saveRoutePoint(routePoint);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedRoutePoint);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add RoutePoint: " + e.getMessage());
+        }
     }
 
     @GetMapping("/RoutePoints")
-    public List<RoutePoint> findAllRoutePoints() {
-        return routeService.getRoutePoint();
+    public ResponseEntity<?> findAllRoutePoints() {
+        try {
+            List<RoutePoint> routePoints = routeService.getRoutePoint();
+            return ResponseEntity.status(HttpStatus.OK).body(routePoints);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch RoutePoints: " + e.getMessage());
+        }
     }
 
     @GetMapping("/RoutePoints/{id}")
-    public RoutePoint findRoutePointById(@PathVariable int id) {
-        return routeService.getRoutePoint(id);
+    public ResponseEntity<?> findRoutePointById(@PathVariable int id) {
+        try {
+            RoutePoint routePoint = routeService.getRoutePoint(id);
+            if (routePoint != null) {
+                return ResponseEntity.status(HttpStatus.OK).body(routePoint);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("RoutePoint not found with id: " + id);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch RoutePoint: " + e.getMessage());
+        }
     }
 
-
-    @PutMapping("/update")
-    public RoutePoint updateRoutePoint(@RequestBody RoutePoint routePoint) {
-        return routeService.updateRoutePoint(routePoint);
+    @PutMapping("/RoutePoints/update")
+    public ResponseEntity<?> updateRoutePoint(@RequestBody RoutePoint routePoint) {
+        try {
+            RoutePoint updatedRoutePoint = routeService.updateRoutePoint(routePoint);
+            if (updatedRoutePoint != null) {
+                return ResponseEntity.status(HttpStatus.OK).body(updatedRoutePoint);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("RoutePoint not found with id: " + routePoint.getId());
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update RoutePoint: " + e.getMessage());
+        }
     }
 
-    @DeleteMapping("/delete/{id}")
-    public String deleteRoutePoint(@PathVariable int id) {
-        return routeService.deleteRoutePoint(id);
+    @DeleteMapping("/RoutePoints/delete/{id}")
+    public ResponseEntity<?> deleteRoutePoint(@PathVariable int id) {
+        try {
+            String result = routeService.deleteRoutePoint(id);
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete RoutePoint: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/RoutePoints/delete/{description}")
+    public ResponseEntity<?> deleteRoutePointsByDescription(@PathVariable String description) {
+        try {
+            String deletedCount = routeService.deleteRoutePointsByDescription(description);
+            return ResponseEntity.status(HttpStatus.OK).body(deletedCount + " RoutePoints deleted for description: " + description);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete RoutePoints: " + e.getMessage());
+        }
     }
 
     @GetMapping("/")
-    public String index() {
-        StringBuilder response = new StringBuilder();
-        response.append("Greetings from Spring Boot!<br>");
-
-        // Fetch some RoutePoints from the service
-        Iterable<RoutePoint> routePoints = routeService.getAllRoutePoints();
-
-        // Append information about each RoutePoint to the response
-        for (RoutePoint routePoint : routePoints) {
-            response.append("RoutePoint ID: ").append(routePoint.getId()).append("<br>");
-            response.append("Description: ").append(routePoint.getDescription()).append("<br>");
-            response.append("Sequenz: ").append(routePoint.getSequenz()).append("<br>");
-            response.append("AtHome: ").append(routePoint.isAtHome()).append("<br>");
-            response.append("Coordinates: ").append(routePoint.getCoordinates()).append("<br>");
-            response.append("Vehicle: ").append(routePoint.getVehicle()).append("<br><br>");
+    public ResponseEntity<?> index() {
+        try {
+            StringBuilder response = new StringBuilder();
+            Iterable<RoutePoint> routePoints = routeService.getAllRoutePoints();
+            for (RoutePoint routePoint : routePoints) {
+                response.append("RoutePoint ID: ").append(routePoint.getId()).append("<br>");
+                response.append("Description: ").append(routePoint.getDescription()).append("<br>");
+                response.append("Sequenz: ").append(routePoint.getSequenz()).append("<br>");
+                response.append("AtHome: ").append(routePoint.isAtHome()).append("<br>");
+                response.append("Coordinates: ").append(routePoint.getCoordinates()).append("<br>");
+                response.append("Vehicle: ").append(routePoint.getVehicle()).append("<br><br>");
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch RoutePoints: " + e.getMessage());
         }
-
-        return response.toString();
     }
 }

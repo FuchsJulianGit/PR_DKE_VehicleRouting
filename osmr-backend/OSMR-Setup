@@ -1,0 +1,13 @@
+https://download.geofabrik.de/europe/austria.html
+
+wget http://download.geofabrik.de/europe/austria-latest.osm.pbf
+
+docker pull osrm/osrm-backend:latest
+
+docker run -t -v ${PWD}:/data osrm/osrm-backend osrm-extract -p /opt/car.lua /data/austria-latest.osm.pbf    
+
+docker run -t -v ${PWD}:/data osrm/osrm-backend osrm-contract /data/austria-latest.osrm
+
+docker run -t -i -p 5000:5000 -v ${PWD}:/data osrm/osrm-backend osrm-routed /data/austria-latest.osrm
+
+http://localhost:5000/route/v1/driving/47.6097,13.0419;47.6097,13.1419;?steps=true

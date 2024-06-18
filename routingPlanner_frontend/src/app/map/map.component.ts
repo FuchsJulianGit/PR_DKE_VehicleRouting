@@ -136,7 +136,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.resetMap();
 
 
-    //console.log(this.mapCoordinates);
+    console.log(this.mapCoordinates);
     //console.log(this.inputValue);
 
     this.markers = [];
