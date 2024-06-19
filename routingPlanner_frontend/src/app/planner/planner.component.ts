@@ -92,7 +92,8 @@ interface RouteFormat {
   id: number, 
   sequenceNumber: number,
   coordinates: number[],
-  mainRoute: boolean
+  mainRoute: boolean,
+  vehicleId: number
 };
 
 interface Route_DB{
@@ -323,13 +324,35 @@ submitSelectedRoute(){
       }
     }
 
+
+
+
+
+
+    /*if(coordinate_id == null){
+      for(let vehicle of this.vehicles){
+        console.log(vehicle);
+        console.log(""+vehicle.coordinates.x + " == " + step.location[1] + " " + vehicle.coordinates.y + " == " + step.location[0]);
+      if(vehicle.coordinates.x == step.location[1] && vehicle.coordinates.y == step.location[0]){
+        coordinate_id = vehicle.coordinates.id;
+        break;
+      }
+    }
+  }*/
+
+   // console.log(step);
+   // console.log(this.selectedVehicle);
+   // console.log(this.personDatabase);
+   // console.log(this.selectedRoute);
+
     var newRouteVar: RoutePoint = {
       id: 0,
       description: this.selectedRoute.description,
       sequenz: count,
       atHome: isHome,
       coordinates: ("[" +step.location[1] + "," + step.location[0] + "]"),
-      vehicle: this.selectedVehicle.id
+      vehicle: this.selectedVehicle.id,
+      coordinateId: this.returnCoordId(step.location[1], step.location[0])
     };
     count++;
     routeSubmit.push(newRouteVar);
@@ -342,6 +365,27 @@ submitSelectedRoute(){
   }
   }
 }
+
+   
+public returnCoordId(lat: any, long:any){
+  let coordinate_id = null; //Default Value - Vehicles can currently not be assigned due to mocking
+  for(let person of this.personDatabase){
+   // console.log("Test");
+    console.log("start  " +person.startCoordinate.latitude + " == " + lat + " " + person.startCoordinate.longitude + " == " + long);
+    if((person.startCoordinate.latitude == lat) && (person.startCoordinate.longitude == long)){
+      console.log("TREEFFERER" + person.startCoordinate.id);
+      return person.startCoordinate.id;
+      break;
+    }
+
+    console.log("end " +person.endCoordinate.latitude + " == " + lat + " " + person.endCoordinate.longitude + " == " + long);
+    if((person.endCoordinate.latitude == lat) && (person.endCoordinate.longitude == long)){
+      console.log("TREEFFERER" + person.endCoordinate.id);
+    return person.endCoordinate.id;
+    break;
+  }}
+  return null;
+  }
 
 getPersonCheckboxValues(personListId: string): { id: string; checked: boolean }[] {
   const personCheckboxValues: { id: string; checked: boolean }[] = [];
@@ -473,12 +517,12 @@ createVehicleList(companyName?: string){
 
 async getFilteredVehicles(): Promise<VehicleLocal[]>  {
 
-  console.log(this.personDatabase);
+  //console.log(this.personDatabase);
 
   await this.waitForVehicles();
 
-  console.log(this.personDatabase);
-  console.log(this.vehicles);
+  //console.log(this.personDatabase);
+  //console.log(this.vehicles);
 
   this.person = this.personDatabase;
 
@@ -559,21 +603,90 @@ if(this.selectedVehicle.id != undefined)
 
   formatMultiRouteData(optimizationOutput: any): RouteFormat[]{
     var routesArray: RouteFormat[] = [];
-    console.log(optimizationOutput);
+    //console.log(optimizationOutput);
     for(var routee of optimizationOutput.routes){
-      console.log(routee);
+      //console.log(routee);
       routesArray = [...routesArray, ... (this.formatData(routee))];
     }
 
-    console.log(routesArray);
+    //console.log(routesArray);
+    this.createDriverPlan(routesArray);
+
     return routesArray;
+  }
+
+  createDriverPlan(routesArray: RouteFormat[]){
+    /** Part 1 **/
+   // console.log(this.personDatabase);
+   // console.log(this.selectedVehicle.companyName);
+
+    let first = true;
+    routesArray.forEach(routePoint => {
+
+      if(routePoint.mainRoute){
+
+      const { id } = routePoint;
+
+    //  console.log(routePoint.id);
+
+      if (routePoint.id > 10000) {
+        if(first){
+
+        }
+        const vehicle = this.vehicles.find(vehicle => vehicle.id === routePoint.id - 10000);
+        if (vehicle && first) {
+          console.log("Start Address for Vehicle with ID: " + 
+            /*vehicle.startAddress.streetName + " " +
+            vehicle.startAddress.doorNumber + ", " +
+            vehicle.startAddress.zipcode + " " +
+            vehicle.startAddress.city + " "+
+            */ vehicle.startCoordinate);
+        }
+        
+        if (vehicle && !first) {
+          console.log("End Address for Vehicle with ID: " + 
+            /*vehicle.targetAddress.streetName + " " +
+            vehicle.targetAddress.doorNumber + ", " +
+            vehicle.targetAddress.zipcode + " " +
+            vehicle.targetAddress.city + " " +
+            */ vehicle.endCoordinate
+            );
+        } 
+      }
+
+      if (routePoint.id < 1000) {
+        const person = this.personDatabase.find(person => person.id === id);
+        if (person) {
+          console.log(" Start Address for person with ID: " + 
+            person.targetAddress.streetName + " " +
+            person.targetAddress.doorNumber + ", " +
+            person.targetAddress.zipcode + " " +
+            person.targetAddress.city + " ");
+        }
+      }
+
+      if (routePoint.id > 1000 && id < 10000) {
+        const person = this.personDatabase.find(person => person.id === routePoint.id - 1000);
+        if (person) {
+          console.log("Target Address for person with ID: " + 
+            person.targetAddress.streetName + " " +
+            person.targetAddress.doorNumber + ", " +
+            person.targetAddress.zipcode + " " +
+            person.targetAddress.city + " ");
+        }
+      }
+    }
+
+    })
+  /** Part 1 **/
+
   }
 
   
 
   formatData(routeObj: any): RouteFormat[]{
 
-    console.log(routeObj);
+    //console.log(routeObj);
 
     const routesArray: RouteFormat[] = [];
     let count:number = 0;
@@ -583,7 +696,8 @@ if(this.selectedVehicle.id != undefined)
           id: (step.type == "start" ||step.type == "end") ? routeObj.vehicle + 10000 : step.id, 
           sequenceNumber: count,
           coordinates: [step.location[1], step.location[0]],
-          mainRoute: (this.selectedVehicle.id == routeObj.vehicle) ? true : false
+          mainRoute: (this.selectedVehicle.id == routeObj.vehicle) ? true : false,
+          vehicleId: routeObj.vehicle
         }
         count++;
         routesArray.push(addRoute);
@@ -593,7 +707,7 @@ if(this.selectedVehicle.id != undefined)
 
   createPersonList(route: any, vehicleId: number){
 
-    console.log("Person List is called");
+    //console.log("Person List is called");
 
     const findPersonById = (id: number) => this.personDatabase.find(person => person.id === id);
     let personList = document.getElementById("vehicle-personList-" + vehicleId);
@@ -605,8 +719,8 @@ if(this.selectedVehicle.id != undefined)
     let personListHTML = '<style>.person-icon { width: auto; height: 100%; min-height: 3.6rem; min-width: 3.6rem; padding: 2rem 1.2rem 1.2rem 1.2rem; border-radius: 1.6rem; border: solid 0.3rem #E9e9e9; background-color: #F1F1F1; display: flex; align-items: center;margin: 0 2rem 0 2rem; }    .person-label { display: flex; align-items: center; cursor: pointer; padding: 1.2rem 0; padding: 1rem 0rem 1rem 0rem; width: 100% !important; } .vehicle-label-outter .person-label:hover{ background-color: #D3D3D3; }.person-list{ width: 100% !important; background-color: #ffffff; margin-bottom: -1.6rem; }.person-checkbox { padding: 0 1rem 0 1rem; margin: 0 1.5rem 0 1.5rem; }.person-checkbox[type=checkbox] { -ms-transform: scale(1.5); -moz-transform: scale(1.5); -webkit-transform: scale(1.5); -o-transform: scale(1.5); transform: scale(1.5); }.person-checkbox:checked + .person-icon img { filter: invert(100%); }.person-icon img { width: 3.6rem; height: 3.6rem; opacity: 1; }.person-details { flex: 1; }.person-title { font-size: 2rem; font-weight: 300; color: #333; }.person-details { flex: 1; display: flex; flex-direction: column; }.person-name { font-size: 1.6rem; font-weight: bold; color: #333; }.person-company{ font-weight: 900; font-size: 1.2rem; color: #999; }.person-coordinates { font-size: 1.2rem; color: #999; }</style>';
 
 
-    console.log(route);
-    console.log(route ? "True" : "False");
+    //console.log(route);
+    //console.log(route ? "True" : "False");
 
 
     if(!route){
@@ -668,8 +782,8 @@ createRoutes(vehicles: VehicleLocal[], person: PersonLocal[]): Route[] {
       }
       personByCompany[companyName].push(person);
   });
-  console.log("WORKS??");
-  console.log(personByCompany);
+  //console.log("WORKS??");
+  //console.log(personByCompany);
 
   // Assign person to vehicles
   vehicles.forEach(vehicle => {
@@ -743,7 +857,7 @@ async calculateRoute(){
   //const selectedPerson = this.person.filter(person => person.company === this.selectedVehicle.CompanyName);
   let selectedPerson = this.person;
   //Switch comments to select based on companyssss
-  console.log(selectedPerson);
+  //console.log(selectedPerson);
 
 
 
@@ -759,7 +873,7 @@ selectedPerson = selectedPerson.filter(e => {
                     (endLongitude >= 9 && endLongitude <= 18);
 
     if (!isValid) {
-      console.error('Invalid person coordinates detected:', {
+      console.error('Invalid person coordinates detected: OUT OF BOUNDS', {
         startLatitude,
         endLatitude,
         startLongitude,
@@ -771,7 +885,7 @@ selectedPerson = selectedPerson.filter(e => {
     return isValid;
   });
 
-  console.log(selectedPerson);
+  //console.log(selectedPerson);
 
 
 
@@ -780,11 +894,13 @@ selectedPerson = selectedPerson.filter(e => {
     skills: [(person.wheelchair ? 2 : 1)],
     pickup: {
         id: person.id, 
+        name: "TEST",
         service: 300,
         location: [person.startCoordinate.longitude, person.startCoordinate.latitude] 
     },
     delivery: {
-        id: person.id+1000, 
+        id: person.id+1000,
+        name: "TEST", 
         service: 300, 
         location: [person.endCoordinate.longitude, person.endCoordinate.latitude]
     }
@@ -792,7 +908,7 @@ selectedPerson = selectedPerson.filter(e => {
   
   //const selectedVehicles = this.vehicles.filter(vehicle => vehicle.CompanyName === this.selectedVehicle.CompanyName);
   let selectedVehicles = this.vehicles;
-  console.log(selectedVehicles);
+  //console.log(selectedVehicles);
 
   selectedVehicles = selectedVehicles.filter(e => {
     const startLatitude = e.startCoordinate.x != null ? e.startCoordinate.x : 0;
@@ -806,7 +922,7 @@ selectedPerson = selectedPerson.filter(e => {
                     (endLongitude >= 9 && endLongitude <= 18);
 
     if (!isValid) {
-      console.error('Invalid vehicle coordinates detected:', {
+      console.error('Invalid vehicle coordinates detected: OUT OF BOUNDS', {
         startLatitude,
         endLatitude,
         startLongitude,
@@ -821,7 +937,7 @@ selectedPerson = selectedPerson.filter(e => {
 
 // return [this.vehicles.map(vehicles => [vehicles.coordinates.longitude, vehicles.coordinates.latitude]), true];
 
-console.log(selectedVehicles);
+//console.log(selectedVehicles);
 
   const vehiclesForOptimization = selectedVehicles.map(vehicle => ({
     id: vehicle.id,
@@ -834,8 +950,10 @@ console.log(selectedVehicles);
     skills: (vehicle.canTransportWheelchairs ? [1, 2] : [1]),
   }));
 
+  console.log("%cVehicles for optimization: ", "color: lightblue");
   console.log(vehiclesForOptimization);
 
+  console.log("%cShipments for optimization: ", "color: lightblue");
   console.log(shipmentsForOptimization);
 
 try {
@@ -843,15 +961,15 @@ try {
     shipments: shipmentsForOptimization,
     vehicles: vehiclesForOptimization,
   });
-  console.dir(shipmentsForOptimization);
-  console.dir(vehiclesForOptimization);
+
+  console.log("%cOptimization Output: ", "color: lightblue");
   console.dir(response);
   return response;
 
   }catch (error) {
     console.error("Error occurred while calculating route:", error);
 
-    console.log("vehicle-personList-" + this.selectedVehicle.id);
+    //console.log("vehicle-personList-" + this.selectedVehicle.id);
     let personList = document.getElementById("vehicle-personList-" + this.selectedVehicle.id);
     
     let personListHTML =  `

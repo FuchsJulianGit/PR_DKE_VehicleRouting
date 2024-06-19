@@ -5,7 +5,20 @@ export interface RoutePoint{
     atHome: boolean,
     coordinates: string,
     vehicle: number
+    coordinateId: number
 }
+
+export interface RoutePointNew{
+  id: number,
+  routeName: String,
+  sequence: number,
+  atHome: boolean,
+  coordinates: number,
+  vehicle: number
+}
+
+
+
 
 export interface Vehicle {
     id: number;

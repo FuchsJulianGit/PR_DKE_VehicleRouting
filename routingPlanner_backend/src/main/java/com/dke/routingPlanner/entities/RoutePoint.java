@@ -23,6 +23,10 @@ public class RoutePoint {
     @Column(name = "VEHICLE")
     private int vehicle;
 
+    @Column(name = "COORDINATE_ID")
+    private int coordinateId;
+
+
     // Getters and setters
     public int getId() {
         return id;
@@ -70,6 +74,14 @@ public class RoutePoint {
 
     public void setVehicle(int vehicle) {
         this.vehicle = vehicle;
+    }
+
+    public int getCoordinateId() {
+        return coordinateId;
+    }
+
+    public void setCoordinateId(int coordinateId) {
+        this.coordinateId = coordinateId;
     }
 }
 

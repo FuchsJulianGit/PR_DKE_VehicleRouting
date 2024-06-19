@@ -136,7 +136,7 @@ export class MapComponent implements AfterViewInit, OnChanges {
     this.resetMap();
 
 
-    console.log(this.mapCoordinates);
+    //console.log(this.mapCoordinates);
     //console.log(this.inputValue);
 
     this.markers = [];
@@ -182,8 +182,12 @@ private isMarkerDrawn(markerCoord: any): boolean {
     return coordinates;
   }
 
-  private initializeRouting() {
+   private async initializeRouting() {
     this.resetMap();
+
+    let serviceUrl = "http://localhost:5000/route/v1";
+
+    let serverAvailable = await checkOSMRServer(serviceUrl);
 
     //console.log(this.routesData);
 
@@ -225,6 +229,25 @@ private isMarkerDrawn(markerCoord: any): boolean {
       //console.log( this.innerRoute);
 
 
+
+
+     /* try{
+      fetch(serviceUrl)
+        .then(response => {
+          //console.log(response);
+          if(response.status == 400){
+         // console.log("%cSERVER AVAILABLE... ", "color: green;");
+          serverAvailable = true;
+          }
+        })
+      }catch(error){
+        //console.log("SERVER UNVAILABLE... ", "color: red;");
+        serverAvailable = false;
+      }*/
+
+
+      if(serverAvailable){
+        console.log("%cOSMR SERVER AVAILABLE... ", "color: green;");
          this.innerRoute[index] = L.Routing.control({
           waypoints: [...latlngArray],
           lineOptions: {
@@ -236,6 +259,21 @@ private isMarkerDrawn(markerCoord: any): boolean {
             serviceUrl: "http://localhost:5000/route/v1",
           }) // Remove {servceUrl...} in case OSMR is not working - this is however not suitable for production
         }).addTo(this.map);
+      }else{
+        console.log("%cOSMR SERVER UNVAILABLE... ", "color: red;");
+        this.innerRoute[index] = L.Routing.control({
+          waypoints: [...latlngArray],
+          lineOptions: {
+            styles: [{ color: (routes[0].mainRoute ? '#5733ff' : '#888888'), opacity: 1, weight: 3 }],
+            extendToWaypoints: true,
+            missingRouteTolerance: 10
+          },
+          router: L.Routing.osrmv1(/*{
+            serviceUrl: "http://localhost:5000/route/v1",
+          }*/) // Remove {servceUrl...} in case OSMR is not working - this is however not suitable for production
+        }).addTo(this.map);
+
+      }
 
       const routingControlContainer = this.innerRoute[index].getContainer();
       const controlContainerParent = routingControlContainer?.parentNode;
@@ -258,4 +296,20 @@ private isMarkerDrawn(markerCoord: any): boolean {
   }
 
   }
+
+  const checkOSMRServer = async (url: string): Promise<boolean> => {
+    try {
+      const response = await fetch(url);
+      if (response.status === 400) {
+        //console.log("%cSERVER AVAILABLE...", "color: green;");
+        return true;
+      } else {
+       // console.log("%cSERVER UNAVAILABLE... (unexpected status)", "color: red;");
+        return false;
+      }
+    } catch (error) {
+     // console.log("%cSERVER UNAVAILABLE... (error)", "color: red;");
+      return false;
+    }
+  };
  
