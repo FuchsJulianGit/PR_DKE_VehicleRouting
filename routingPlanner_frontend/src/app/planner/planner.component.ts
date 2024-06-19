@@ -306,19 +306,19 @@ submitSelectedRoute(){
   if(this.selectedRoute){
   for(var step of this.selectedRoute.steps){ 
     var isHome = false;
-    //  console.log(personList);
+      console.log(personList);
     for(var peop of personList){
-
-    //  console.log(Number(peop.id) == Number(step.id));
-    //  console.log(Number(peop.id));
-    //  console.log(this.selectedRoute);
-
 
       if(Number(step.id) >= 10000){
         isHome = true;
         break;
       }
-      if(Number(peop.id) == Number(step.id) || (Number(peop.id) + 1000) == Number(step.id)){
+      if(Number(peop.id) == Number(step.id)){
+        isHome = peop.checked;
+        break;
+      }
+
+      if((Number(peop.id) + 1000) == Number(step.id)){
         isHome = peop.checked;
         break;
       }
@@ -635,44 +635,44 @@ if(this.selectedVehicle.id != undefined)
         }
         const vehicle = this.vehicles.find(vehicle => vehicle.id === routePoint.id - 10000);
         if (vehicle && first) {
-          console.log("Start Address for Vehicle with ID: " + 
+          //console.log("Start Address for Vehicle with ID: " + 
             /*vehicle.startAddress.streetName + " " +
             vehicle.startAddress.doorNumber + ", " +
             vehicle.startAddress.zipcode + " " +
             vehicle.startAddress.city + " "+
-            */ vehicle.startCoordinate);
+           vehicle.startCoordinate); */ 
         }
         
         if (vehicle && !first) {
-          console.log("End Address for Vehicle with ID: " + 
-            /*vehicle.targetAddress.streetName + " " +
+           /*console.log("End Address for Vehicle with ID: " + 
+           vehicle.targetAddress.streetName + " " +
             vehicle.targetAddress.doorNumber + ", " +
             vehicle.targetAddress.zipcode + " " +
             vehicle.targetAddress.city + " " +
-            */ vehicle.endCoordinate
-            );
+             vehicle.endCoordinate
+            );*/
         } 
       }
 
       if (routePoint.id < 1000) {
         const person = this.personDatabase.find(person => person.id === id);
         if (person) {
-          console.log(" Start Address for person with ID: " + 
+        /*  console.log(" Start Address for person with ID: " + 
             person.targetAddress.streetName + " " +
             person.targetAddress.doorNumber + ", " +
             person.targetAddress.zipcode + " " +
-            person.targetAddress.city + " ");
+            person.targetAddress.city + " "); */
         }
       }
 
       if (routePoint.id > 1000 && id < 10000) {
         const person = this.personDatabase.find(person => person.id === routePoint.id - 1000);
         if (person) {
-          console.log("Target Address for person with ID: " + 
+          /*console.log("Target Address for person with ID: " + 
             person.targetAddress.streetName + " " +
             person.targetAddress.doorNumber + ", " +
             person.targetAddress.zipcode + " " +
-            person.targetAddress.city + " ");
+            person.targetAddress.city + " ");*/
         }
       }
     }
@@ -704,6 +704,8 @@ if(this.selectedVehicle.id != undefined)
     }
     return routesArray;
   }
+
+
 
   createPersonList(route: any, vehicleId: number){
 
@@ -752,9 +754,9 @@ if(this.selectedVehicle.id != undefined)
                 </div>
                 <div class="person-details">
                     <span class="person-name">` + person.firstName + " " + person.lastName + `</span>
-                    <span class="person-coordinates">`+ (person.transportProvider || "No company assigned") + `</span>
-                     <span class="person-company">`+ person.targetAddress.streetName + " " + person.targetAddress.doorNumber + " " + person.targetAddress.city + `</span>
-                    <span class="person-coordinates">`+ person.startCoordinate.longitude + `, `+ person.startCoordinate.latitude + `</span>
+                   <!--  <span class="person-coordinates">`+ (person.transportProvider || "No company assigned") + `</span> -->
+                     <span class="person-company">`+ person.startAddress.streetName + " " + person.startAddress.doorNumber + " " + person.targetAddress.city + `</span>
+                     <span class="person-coordinates">`+ person.startCoordinate.longitude + `, `+ person.startCoordinate.latitude + `</span>
                 </div>
                 <div class="checkbox">
                     <input type="checkbox" name="person" class="person-checkbox" [value]="person_selection" id="checkbox-person-`+ person.id + `" checked>
@@ -763,11 +765,49 @@ if(this.selectedVehicle.id != undefined)
         </li>`;
 
       }
+
+      if(step?.id > 1000 && step?.id < 10000 ){
+
+        let person = findPersonById(step?.id - 1000);
+
+        console.log(person);
+        personListHTML +=  `
+        <li>
+            <label class="person-label">
+                <div class="person-icon">
+                    <img src="../../assets/right-from-bracket-solid.svg" alt="Person Icon">
+                </div>
+                <div class="person-details">
+                    <span class="person-name">` + person.firstName + " " + person.lastName + `</span>
+                      <span class="person-company">`+ person.targetAddress.streetName + " " + person.targetAddress.doorNumber + " " + person.targetAddress.city + `</span>
+                     <span class="person-coordinates">`+ person.endCoordinate.longitude + `, `+ person.endCoordinate.latitude + `</span>
+                </div>
+                <div class="checkbox">
+                    <input type="checkbox" name="person" class="person-checkbox" [value]="person_selection" id="checkbox-person-`+ (person.id + 1000) + `" checked>
+                </div>
+            </label>
+        </li>`;
+      }
+
     }
   }
     personList.innerHTML = personListHTML;
+
+   // document.getElementById('personList').innerHTML = personListHTML;
+
+    // Attach event listeners programmatically using arrow function to maintain 'this' context
+    document.querySelectorAll('.person-checkbox').forEach((checkbox) => {
+      checkbox.addEventListener('click', (event) => {
+        const target = event.target as HTMLInputElement;
+        handleCheckboxClick(target);
+      });
+    });
+
+
     }
   }
+
+  
 
 
 createRoutes(vehicles: VehicleLocal[], person: PersonLocal[]): Route[] {
@@ -866,11 +906,12 @@ selectedPerson = selectedPerson.filter(e => {
     const endLatitude = e.endCoordinate.latitude;
     const startLongitude = e.startCoordinate.longitude;
     const endLongitude = e.endCoordinate.longitude;
+    const id = e.id;
 
-    const isValid = (startLatitude >= 45 && startLatitude <= 50) &&
-                    (endLatitude >= 45 && endLatitude <= 50) &&
-                    (startLongitude >= 9 && startLongitude <= 18) &&
-                    (endLongitude >= 9 && endLongitude <= 18);
+    let isValid = (startLatitude >= 45 && startLatitude <= 50) &&
+    (endLatitude >= 45 && endLatitude <= 50) &&
+    (startLongitude >= 9 && startLongitude <= 18) &&
+    (endLongitude >= 9 && endLongitude <= 18);
 
     if (!isValid) {
       console.error('Invalid person coordinates detected: OUT OF BOUNDS', {
@@ -880,7 +921,20 @@ selectedPerson = selectedPerson.filter(e => {
         endLongitude,
         personId: e.id
       });
+    }else{
+
+      isValid = id < 1000;
+
+    if (!isValid) {
+      console.error('Invalid person id detected: Please remove some persons', {
+        startLatitude,
+        endLatitude,
+        startLongitude,
+        endLongitude,
+        personId: e.id
+      });
     }
+  }
 
     return isValid;
   });
@@ -1136,3 +1190,21 @@ vehicles$!: Observable<Vehicle[]>;
 }
 
 
+function handleCheckboxClick(checkbox: HTMLInputElement) {
+  let targetCheckbox;
+  let personId = extractPersonId(checkbox.id);;
+
+  if (personId < 1000) {
+
+    var target = (document.getElementById('checkbox-person-' + (personId + 1000)) as HTMLInputElement);
+    console.log("YEARESSERESR" + target + " " + personId + " " + (document.getElementById('checkbox-person-' +  + (personId + 1000)) as HTMLInputElement));
+
+    target.checked = false;
+  } 
+}
+
+function extractPersonId(checkboxId: string): number {
+  const regex = /checkbox-person-(\d+)/;
+  const match = checkboxId.match(regex);
+  return match ? parseInt(match[1], 10) : 0;
+}
