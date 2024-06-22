@@ -25,9 +25,9 @@ public class RoutePointService {
         return (List<RoutePoint>) repository.findAll();
     }
 
-    public List<RoutePoint> getRoutePointByVehicleId(int vehicle) {
-        return (List<RoutePoint>) repository.findByVehicle(vehicle);
-    }
+    /*public List<RoutePoint> getRoutePointByVehicleId(int vehicleId) {
+        return (List<RoutePoint>) repository.findByVehicle(vehicleId);
+    }*/
 
 
 
@@ -40,10 +40,10 @@ public class RoutePointService {
         return "Point removed " + id;
     }
 
-    public String deleteRoutePointsByDescription(String description) {
+    public String deleteRoutePointsByDescription(String ROUTE_ID) {
         System.out.print("Delete");
-        repository.deleteByDescription(description);
-        return "Route removed " + description;
+        repository.deleteByDescription(ROUTE_ID);
+        return "Route removed " + ROUTE_ID;
     }
 
     public RoutePoint updateRoutePoint(RoutePoint routePoint) {
@@ -58,4 +58,6 @@ public class RoutePointService {
     public Iterable<RoutePoint> getAllRoutePoints() {
         return repository.findAll();
     }
+
+
 }

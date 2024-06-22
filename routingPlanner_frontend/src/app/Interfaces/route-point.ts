@@ -3,19 +3,19 @@ export interface RoutePoint{
     description: String,
     sequenz: number,
     atHome: boolean,
-    coordinates: string,
+    coordinates?: string,
     vehicle: number
     coordinateId: number
 }
 
-export interface RoutePointNew{
+/*export interface RoutePointNew{
   id: number,
   routeName: String,
   sequence: number,
   atHome: boolean,
   coordinates: number,
   vehicle: number
-}
+}*/
 
 
 export interface Route {

@@ -14,9 +14,10 @@ public interface RoutePointRepository extends CrudRepository<RoutePoint, Integer
 
     @Transactional
     @Modifying
-    @Query("DELETE FROM RoutePoint r WHERE r.description = :description")
-    void deleteByDescription(String description);
+    @Query("DELETE FROM RoutePoint r WHERE r.routeId = :routeId")
+    void deleteByDescription(String routeId);
 
-    List<RoutePoint> findByVehicle(int vehicle);
+    List<RoutePoint> findByRouteId(int routeId);
+    //List<RoutePoint> findByVehicle(int vehicleId);
 
 }

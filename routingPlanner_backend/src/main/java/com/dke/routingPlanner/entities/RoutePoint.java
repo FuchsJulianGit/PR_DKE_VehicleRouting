@@ -2,26 +2,24 @@ package com.dke.routingPlanner.entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "ROUTE_POINTS")
+@Table(name = "ROUTE_POINT")
 public class RoutePoint {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "DESCRIPTION")
-    private String description;
+    @Column(name = "ROUTE_ID")
+    private int routeId;
 
-    @Column(name = "SEQUENZ")
-    private int sequenz;
+    @Column(name = "SEQUENCE")
+    private int sequence;
 
     @Column(name = "ATHOME")
     private boolean atHome;
-    @Column(name = "COORDINATES")
-    private String coordinates;
 
-    @Column(name = "VEHICLE")
-    private int vehicle;
+    @Column(name = "VEHICLE_ID")
+    private int vehicleId;
 
     @Column(name = "COORDINATE_ID")
     private int coordinateId;
@@ -36,20 +34,20 @@ public class RoutePoint {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
+    public int getRouteId() {
+        return routeId;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDescription(Integer routeId) {
+        this.routeId = routeId;
     }
 
     public int getSequenz() {
-        return sequenz;
+        return sequence;
     }
 
     public void setSequenz(int sequenz) {
-        this.sequenz = sequenz;
+        this.sequence = sequenz;
     }
 
     public boolean isAtHome() {
@@ -60,20 +58,20 @@ public class RoutePoint {
         this.atHome = atHome;
     }
 
-    public String getCoordinates() {
-        return coordinates;
+    public int getCoordinates() {
+        return coordinateId;
     }
 
-    public void setCoordinates(String coordinates) {
-        this.coordinates = coordinates;
+    public void setCoordinates(Integer coordinateId) {
+        this.coordinateId = coordinateId;
     }
 
     public int getVehicle() {
-        return vehicle;
+        return vehicleId;
     }
 
-    public void setVehicle(int vehicle) {
-        this.vehicle = vehicle;
+    public void setVehicle(int vehicleId) {
+        this.vehicleId = vehicleId;
     }
 
     public int getCoordinateId() {
@@ -82,6 +80,10 @@ public class RoutePoint {
 
     public void setCoordinateId(int coordinateId) {
         this.coordinateId = coordinateId;
+    }
+
+    public Object getSequence() {
+        return this.sequence;
     }
 }
 

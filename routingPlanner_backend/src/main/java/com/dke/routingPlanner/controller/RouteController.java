@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -45,5 +46,11 @@ public class RouteController {
     public ResponseEntity<Void> deleteRoute(@PathVariable int id) {
         routeService.deleteRoute(id);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @GetMapping("/Route_Plan")
+    public List<Map<String, Object>> getRoutes() {
+        return routeService.getRoutesWithPoints();
     }
 }

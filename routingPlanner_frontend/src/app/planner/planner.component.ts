@@ -336,7 +336,7 @@ submitSelectedRoute(){
             }
           }
       
-          var newRouteVar: RoutePoint = {
+          /*var newRouteVar: RoutePoint = {
             id: 0,
             description: ""+response.id,
             sequenz: count,
@@ -349,6 +349,24 @@ submitSelectedRoute(){
           routeSubmit.push(newRouteVar);
       
           this.routePointService.save(newRouteVar).subscribe(
+            (response) => {console.log('Route point added successfully:', response);},
+            (error) => { console.error('Error adding route point:', error);}
+          );*/
+
+       
+
+          var RouteVar: RoutePoint = {
+            id: 0,
+            description: ""+response.id,
+            sequenz: count,
+            atHome: isHome,
+            vehicle: this.selectedVehicle.id,
+            coordinateId: this.returnCoordId(step.location[1], step.location[0])
+          };
+          count++;
+          routeSubmit.push(RouteVar);
+      
+          this.routePointService.save(RouteVar).subscribe(
             (response) => {console.log('Route point added successfully:', response);},
             (error) => { console.error('Error adding route point:', error);}
           );

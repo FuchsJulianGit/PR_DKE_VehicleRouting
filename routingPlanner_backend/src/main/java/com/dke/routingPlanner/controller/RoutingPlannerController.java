@@ -1,7 +1,7 @@
 package com.dke.routingPlanner.controller;
 
 import com.dke.routingPlanner.entities.RoutePoint;
-import com.dke.routingPlanner.entities.RoutePointNew;
+//import com.dke.routingPlanner.entities.RoutePointNew;
 import com.dke.routingPlanner.services.RoutePointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ public class RoutingPlannerController {
 
     //Angular Frankenstein - DELETE in case of error
 
-    @GetMapping("/RoutePointsNew")
+    /*@GetMapping("/RoutePointsNew")
     public ResponseEntity<?> findAllRoutePointsNew() {
         try {
             List<RoutePoint> routePoints = routeService.getRoutePoint();
@@ -30,9 +30,9 @@ public class RoutingPlannerController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch RoutePoints: " + e.getMessage());
         }
-    }
+    }*/
 
-    @GetMapping("/RoutePointsNew/vehicle/{vehicle}")
+  /*  @GetMapping("/RoutePointsNew/vehicle/{vehicle}")
     public ResponseEntity<?> findRoutePointByVehicleId(@PathVariable int vehicle) {
         try {
             List<RoutePoint> routePoints = routeService.getRoutePointByVehicleId(vehicle);
@@ -43,20 +43,20 @@ public class RoutingPlannerController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch RoutePoints: " + e.getMessage());
         }
-    }
+    }*/
 
 
 
-    private RoutePointNew convertToRoutePointNew(RoutePoint routePoint) {
+  /*  private RoutePointNew convertToRoutePointNew(RoutePoint routePoint) {
         RoutePointNew modifiedRoutePoint = new RoutePointNew();
         modifiedRoutePoint.setId(routePoint.getId());
-        modifiedRoutePoint.setRouteName(routePoint.getDescription());
+        modifiedRoutePoint.setRouteName(routePoint.getRouteId());
         modifiedRoutePoint.setSequence(routePoint.getSequenz());
         modifiedRoutePoint.setAtHome(routePoint.isAtHome());
         modifiedRoutePoint.setCoordinates(routePoint.getCoordinateId());
         modifiedRoutePoint.setVehicle(routePoint.getVehicle());
         return modifiedRoutePoint;
-    }
+    }*/
 
 
 
@@ -142,7 +142,7 @@ public class RoutingPlannerController {
             Iterable<RoutePoint> routePoints = routeService.getAllRoutePoints();
             for (RoutePoint routePoint : routePoints) {
                 response.append("RoutePoint ID: ").append(routePoint.getId()).append("<br>");
-                response.append("Route_Name: ").append(routePoint.getDescription()).append("<br>");
+                response.append("Route_Name: ").append(routePoint.getRouteId()).append("<br>");
                 response.append("Sequenz: ").append(routePoint.getSequenz()).append("<br>");
                 response.append("AtHome: ").append(routePoint.isAtHome()).append("<br>");
                 response.append("Coordinates: ").append(routePoint.getCoordinates()).append("<br>");

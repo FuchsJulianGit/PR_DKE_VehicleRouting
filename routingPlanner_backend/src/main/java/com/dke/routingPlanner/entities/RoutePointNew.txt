@@ -21,7 +21,7 @@ public class RoutePointNew {
             return routeName;
         }
 
-        public void setRouteName(String routeName) {
+        public void setRouteName(int routeId) {
             this.routeName = routeName;
         }
 
