@@ -25,6 +25,12 @@ public class RouteService {
         return (List<RoutePoint>) repository.findAll();
     }
 
+    public List<RoutePoint> getRoutePointByVehicleId(int vehicle) {
+        return (List<RoutePoint>) repository.findByVehicle(vehicle);
+    }
+
+
+
     public RoutePoint getRoutePoint(int id) {
         return repository.findById(id).orElse(null);
     }

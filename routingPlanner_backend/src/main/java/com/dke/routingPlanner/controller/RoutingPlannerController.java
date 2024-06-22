@@ -32,6 +32,21 @@ public class RoutingPlannerController {
         }
     }
 
+    @GetMapping("/RoutePointsNew/vehicle/{vehicle}")
+    public ResponseEntity<?> findRoutePointByVehicleId(@PathVariable int vehicle) {
+        try {
+            List<RoutePoint> routePoints = routeService.getRoutePointByVehicleId(vehicle);
+            List<RoutePointNew> modifiedRoutePoints = routePoints.stream()
+                    .map(this::convertToRoutePointNew)
+                    .collect(Collectors.toList());
+            return ResponseEntity.status(HttpStatus.OK).body(modifiedRoutePoints);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch RoutePoints: " + e.getMessage());
+        }
+    }
+
+
+
     private RoutePointNew convertToRoutePointNew(RoutePoint routePoint) {
         RoutePointNew modifiedRoutePoint = new RoutePointNew();
         modifiedRoutePoint.setId(routePoint.getId());
@@ -115,6 +130,10 @@ public class RoutingPlannerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete RoutePoints: " + e.getMessage());
         }
     }
+
+
+
+
 
     @GetMapping("/")
     public ResponseEntity<?> index() {

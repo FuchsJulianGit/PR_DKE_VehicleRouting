@@ -770,7 +770,7 @@ if(this.selectedVehicle.id != undefined)
 
         let person = findPersonById(step?.id - 1000);
 
-        console.log(person);
+        //console.log(person);
         personListHTML +=  `
         <li>
             <label class="person-label">
@@ -1197,7 +1197,7 @@ function handleCheckboxClick(checkbox: HTMLInputElement) {
   if (personId < 1000) {
 
     var target = (document.getElementById('checkbox-person-' + (personId + 1000)) as HTMLInputElement);
-    console.log("YEARESSERESR" + target + " " + personId + " " + (document.getElementById('checkbox-person-' +  + (personId + 1000)) as HTMLInputElement));
+   // console.log("YEARESSERESR" + target + " " + personId + " " + (document.getElementById('checkbox-person-' +  + (personId + 1000)) as HTMLInputElement));
 
     target.checked = false;
   } 

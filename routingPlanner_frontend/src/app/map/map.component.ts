@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import * as L from 'leaflet';
 import 'leaflet-routing-machine';
 import 'leaflet/dist/leaflet.css'
+import { VehicleService } from '../vehicle/vehicle.service';
 
 
 @Component({
@@ -245,6 +246,7 @@ private isMarkerDrawn(markerCoord: any): boolean {
         serverAvailable = false;
       }*/
 
+      // console.log(routes);
 
       if(serverAvailable){
         console.log("%cOSMR SERVER AVAILABLE... ", "color: green;");
@@ -261,6 +263,7 @@ private isMarkerDrawn(markerCoord: any): boolean {
         }).addTo(this.map);
       }else{
         console.log("%cOSMR SERVER UNVAILABLE... ", "color: red;");
+
         this.innerRoute[index] = L.Routing.control({
           waypoints: [...latlngArray],
           lineOptions: {
