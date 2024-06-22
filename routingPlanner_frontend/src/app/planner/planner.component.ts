@@ -9,8 +9,9 @@ import { publishFacade } from '@angular/compiler';
 import { RoutePointService } from '../route-point-list/route-point-service.service';
 import { VehicleService } from '../vehicle/vehicle.service';
 import { PersonService } from '../person/person.service';
+import { RouteService } from '../route/route.service';
 
-import { RoutePoint, Person, Vehicle } from '../Interfaces/route-point'
+import { RoutePoint, Route, Person, Vehicle } from '../Interfaces/route-point'
 import Openrouteservice from 'openrouteservice-js';
 import { routes } from '../app.routes';
 import { Observable, of } from 'rxjs';
@@ -73,7 +74,7 @@ interface Address {
   city: string;
 }
 
-interface Route {
+interface RouteMapPoint {
   vehicle_id: number;
   start_location: number[];
   end_location: number[];
@@ -187,7 +188,7 @@ export class PlannerComponent {
   formattedRoutesArray: any[] = [];
   data!: Observable<any>;
 
-  constructor(/*private vehicleService: vehicleService*/private elementRef: ElementRef, public routePointService: RoutePointService, private personService: PersonService, private vehicleService:  VehicleService) {
+  constructor(/*private vehicleService: vehicleService*/private elementRef: ElementRef, public routePointService: RoutePointService, private personService: PersonService, private vehicleService:  VehicleService, private routeService:  RouteService) {
     //this.companies = 
 
     //console.dir(this.companies);
@@ -304,65 +305,62 @@ submitSelectedRoute(){
   var count:number = 0;
 
   if(this.selectedRoute){
-  for(var step of this.selectedRoute.steps){ 
-    var isHome = false;
-      console.log(personList);
-    for(var peop of personList){
+    
 
-      if(Number(step.id) >= 10000){
-        isHome = true;
-        break;
-      }
-      if(Number(peop.id) == Number(step.id)){
-        isHome = peop.checked;
-        break;
-      }
-
-      if((Number(peop.id) + 1000) == Number(step.id)){
-        isHome = peop.checked;
-        break;
-      }
-    }
-
-
-
-
-
-
-    /*if(coordinate_id == null){
-      for(let vehicle of this.vehicles){
-        console.log(vehicle);
-        console.log(""+vehicle.coordinates.x + " == " + step.location[1] + " " + vehicle.coordinates.y + " == " + step.location[0]);
-      if(vehicle.coordinates.x == step.location[1] && vehicle.coordinates.y == step.location[0]){
-        coordinate_id = vehicle.coordinates.id;
-        break;
-      }
-    }
-  }*/
-
-   // console.log(step);
-   // console.log(this.selectedVehicle);
-   // console.log(this.personDatabase);
-   // console.log(this.selectedRoute);
-
-    var newRouteVar: RoutePoint = {
+    var newRoute: Route = {
       id: 0,
-      description: this.selectedRoute.description,
-      sequenz: count,
-      atHome: isHome,
-      coordinates: ("[" +step.location[1] + "," + step.location[0] + "]"),
-      vehicle: this.selectedVehicle.id,
-      coordinateId: this.returnCoordId(step.location[1], step.location[0])
-    };
-    count++;
-    routeSubmit.push(newRouteVar);
+      routeName: this.selectedRoute.description,
+      vehicleId: this.selectedVehicle.id
+    }
 
-    this.routePointService.save(newRouteVar).subscribe(
-      (response) => {console.log('Route point added successfully:', response);},
+    this.routeService.save(newRoute).subscribe(
+      (response) => {console.log('Route point added successfully:', response);
+
+        for(var step of this.selectedRoute.steps){ 
+          var isHome = false;
+            console.log(personList);
+          for(var peop of personList){
+      
+            if(Number(step.id) >= 10000){
+              isHome = true;
+              break;
+            }
+            if(Number(peop.id) == Number(step.id)){
+              isHome = peop.checked;
+              break;
+            }
+      
+            if((Number(peop.id) + 1000) == Number(step.id)){
+              isHome = peop.checked;
+              break;
+            }
+          }
+      
+          var newRouteVar: RoutePoint = {
+            id: 0,
+            description: ""+response.id,
+            sequenz: count,
+            atHome: isHome,
+            coordinates: ("[" +step.location[1] + "," + step.location[0] + "]"),
+            vehicle: this.selectedVehicle.id,
+            coordinateId: this.returnCoordId(step.location[1], step.location[0])
+          };
+          count++;
+          routeSubmit.push(newRouteVar);
+      
+          this.routePointService.save(newRouteVar).subscribe(
+            (response) => {console.log('Route point added successfully:', response);},
+            (error) => { console.error('Error adding route point:', error);}
+          );
+        }
+      },
       (error) => { console.error('Error adding route point:', error);}
     );
 
-  }
+
+
+
+
   }
 }
 
@@ -370,17 +368,17 @@ submitSelectedRoute(){
 public returnCoordId(lat: any, long:any){
   let coordinate_id = null; //Default Value - Vehicles can currently not be assigned due to mocking
   for(let person of this.personDatabase){
-   // console.log("Test");
-    console.log("start  " +person.startCoordinate.latitude + " == " + lat + " " + person.startCoordinate.longitude + " == " + long);
+      // console.log("Test");
+      //console.log("start  " +person.startCoordinate.latitude + " == " + lat + " " + person.startCoordinate.longitude + " == " + long);
     if((person.startCoordinate.latitude == lat) && (person.startCoordinate.longitude == long)){
-      console.log("TREEFFERER" + person.startCoordinate.id);
+      //console.log("TREEFFERER" + person.startCoordinate.id);
       return person.startCoordinate.id;
       break;
     }
 
-    console.log("end " +person.endCoordinate.latitude + " == " + lat + " " + person.endCoordinate.longitude + " == " + long);
+      //console.log("end " +person.endCoordinate.latitude + " == " + lat + " " + person.endCoordinate.longitude + " == " + long);
     if((person.endCoordinate.latitude == lat) && (person.endCoordinate.longitude == long)){
-      console.log("TREEFFERER" + person.endCoordinate.id);
+      //console.log("TREEFFERER" + person.endCoordinate.id);
     return person.endCoordinate.id;
     break;
   }}
@@ -810,8 +808,8 @@ if(this.selectedVehicle.id != undefined)
   
 
 
-createRoutes(vehicles: VehicleLocal[], person: PersonLocal[]): Route[] {
-  const routes: Route[] = [];
+createRoutes(vehicles: VehicleLocal[], person: PersonLocal[]): RouteMapPoint[] {
+  const routes: RouteMapPoint[] = [];
 
   // Group person by company
   const personByCompany: {[key: string]: PersonLocal[]} = {};
@@ -837,7 +835,7 @@ createRoutes(vehicles: VehicleLocal[], person: PersonLocal[]): Route[] {
       });
 
       // Create route for the vehicle
-      const route: Route = {
+      const route: RouteMapPoint = {
           vehicle_id: vehicle.id,
           start_location: [vehicle.startCoordinate.longitude, vehicle.startCoordinate.latitude],
           end_location: [vehicle.endCoordinate.longitude, vehicle.endCoordinate.latitude],

@@ -18,6 +18,11 @@ export interface RoutePointNew{
 }
 
 
+export interface Route {
+  id: number;
+  routeName: string;
+  vehicleId: number;
+}
 
 
 export interface Vehicle {

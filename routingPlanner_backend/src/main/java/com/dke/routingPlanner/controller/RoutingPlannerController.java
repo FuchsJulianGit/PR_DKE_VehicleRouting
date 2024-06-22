@@ -2,7 +2,7 @@ package com.dke.routingPlanner.controller;
 
 import com.dke.routingPlanner.entities.RoutePoint;
 import com.dke.routingPlanner.entities.RoutePointNew;
-import com.dke.routingPlanner.services.RouteService;
+import com.dke.routingPlanner.services.RoutePointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class RoutingPlannerController {
 
     @Autowired
-    private RouteService routeService;
+    private RoutePointService routeService;
 
     //Angular Frankenstein - DELETE in case of error
 

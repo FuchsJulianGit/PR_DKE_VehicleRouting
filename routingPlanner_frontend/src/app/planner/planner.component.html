@@ -73,12 +73,14 @@
     font-size: 1.6rem;
   }
 
-  .popup-content{
+  /*.popup-content{
     
-  }
+  }*/
 
     </style>
-  <div class="fahrtenblatt popup-overlay">
+ 
+ <!--
+ <div class="fahrtenblatt popup-overlay">
     <div class="popup-content">
       <button class="close-btn" >X</button>
       <div class="route">
@@ -162,7 +164,7 @@
       </div>
     </div>
   </div>
-
+-->
 
 
 <!-- map-page.component.html -->
@@ -211,7 +213,7 @@
                     </div>
                     
                     <div class="wheelchair-icon" *ngIf="vehicle.canTransportWheelchairs">
-                        <div class="seatNR">1</div>
+                        <div class="seatNR"></div>
                         <img src="../../assets/wheelchair-solid.svg" alt="Wheelchair Accessible">
                     </div>
                 </div>
@@ -221,7 +223,7 @@
               <div class="person-list" *ngIf="selectedVehicle">
                 <h3>{{ selectedVehicle.CompanyName }} Employees:</h3>
                 <ul id="vehicle-personList-{{ vehicle.id }}">
-                    
+                    <!-- *** Will be filled with persons *** -->
                 </ul>
             </div>
 
