@@ -53,4 +53,9 @@ public class RouteController {
     public List<Map<String, Object>> getRoutes() {
         return routeService.getRoutesWithPoints();
     }
+
+    @GetMapping("/Route_Plan/vehicle/{vehicleId}")
+    public List<Map<String, Object>> getRoutes(@PathVariable int vehicleId) {
+        return routeService.getRoutesWithPointsByVehicleId(vehicleId);
+    }
 }

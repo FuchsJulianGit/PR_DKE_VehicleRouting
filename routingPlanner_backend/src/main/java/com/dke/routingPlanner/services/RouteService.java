@@ -57,6 +57,13 @@ public class RouteService {
                 .map(this::convertToRouteMap)
                 .collect(Collectors.toList());
     }
+    public List<Map<String, Object>> getRoutesWithPointsByVehicleId(int vehicleId) {
+        Iterable<Route> routes = repository.findByVehicleId(vehicleId);
+        return StreamSupport.stream(routes.spliterator(), false)
+                .map(this::convertToRouteMap)
+                .collect(Collectors.toList());
+    }
+
 
     private Map<String, Object> convertToRouteMap(Route route) {
         Map<String, Object> routeMap = new HashMap<>();
