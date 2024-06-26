@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class RoutePointService {
@@ -59,5 +61,27 @@ public class RoutePointService {
         return repository.findAll();
     }
 
+
+    public List<Map<String, Object>> getRoutesWithPointsPath() {
+        List<RoutePoint> routePointsAtHome = repository.findByAtHome(true);
+        return routePointsAtHome.stream()
+                .map(this::convertToRoutePointMap)
+                .collect(Collectors.toList());
+    }
+
+    public void deleteRoutePointsByRouteId(int routeId) {
+        repository.deleteByRouteId(routeId);
+    }
+
+    private Map<String, Object> convertToRoutePointMap(RoutePoint routePoint) {
+        return Map.of(
+                "id", routePoint.getId(),
+                "routeId", routePoint.getRouteId(),
+                "sequence", routePoint.getSequence(),
+                "atHome", routePoint.isAtHome(),
+                "vehicleId", routePoint.getVehicleId(),
+                "coordinateId", routePoint.getCoordinateId()
+        );
+    }
 
 }

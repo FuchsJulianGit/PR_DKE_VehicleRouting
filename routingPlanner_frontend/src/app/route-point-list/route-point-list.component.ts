@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { RoutePoint, Person, Vehicle } from '../Interfaces/route-point';
+import { RoutePoint, Person, Vehicle } from '../Interfaces/interfaces';
 import { RoutePointService } from './route-point-service.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -32,7 +32,7 @@ export class RoutePointListComponent implements OnInit{
   ngOnInit(){
     this.routePointService.findAll().subscribe((data: RoutePoint[]) => {
       this.route_points = data;
-      console.log("THIS: ");
+     // console.log("THIS: ");
       console.dir(this.route_points);
     });
   }

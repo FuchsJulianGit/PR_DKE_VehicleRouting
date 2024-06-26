@@ -66,11 +66,11 @@ public class RoutePoint {
         this.coordinateId = coordinateId;
     }
 
-    public int getVehicle() {
+    public int getVehicleId() {
         return vehicleId;
     }
 
-    public void setVehicle(int vehicleId) {
+    public void setVehicleId(int vehicleId) {
         this.vehicleId = vehicleId;
     }
 
@@ -85,6 +85,7 @@ public class RoutePoint {
     public Object getSequence() {
         return this.sequence;
     }
+
 }
 
 

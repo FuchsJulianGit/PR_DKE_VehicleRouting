@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { RoutePoint, Person, Vehicle } from '../Interfaces/route-point'
+import { RoutePoint, Person, Vehicle } from '../Interfaces/interfaces'
 
 @Injectable({
   providedIn: 'root'

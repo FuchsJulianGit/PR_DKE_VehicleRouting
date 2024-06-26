@@ -10,8 +10,10 @@ import { RoutePointService } from '../route-point-list/route-point-service.servi
 import { VehicleService } from '../vehicle/vehicle.service';
 import { PersonService } from '../person/person.service';
 import { RouteService } from '../route/route.service';
+import { CoordinatesService } from '../coordinates/coordinates.service';
+import { TransportProviderService } from '../transport-provider/transport-provider.service';
 
-import { RoutePoint, Route, Person, Vehicle } from '../Interfaces/route-point'
+import { RoutePoint, Route, Person, Vehicle } from '../Interfaces/interfaces'
 import Openrouteservice from 'openrouteservice-js';
 import { routes } from '../app.routes';
 import { Observable, of } from 'rxjs';
@@ -141,6 +143,9 @@ export class PlannerComponent {
     { id: 6, name: 'Bob Brown', startCoordinate: { x: 48.20800, y: 16.37170 }, endCoordinate: { x: 48.2583, y: 16.3720 }, company: 'Galactic Motors', needsWheelchair: false  },
     { id: 7, name: 'Eve White', startCoordinate: { x: 48.20850, y: 16.37140 }, endCoordinate: { x: 48.3062, y: 16.3709 }, company: 'Galactic Motors', needsWheelchair: false  },*/
   ]
+  public transportProviders: any[] = [];
+  transportProvidersDatabase: any[] = [];
+  coordinates: any[] = []
 
   person: any[] = [
     /*{ id: 1, name: 'John Doe', startCoordinate: { x: 47.60950, y: 13.04160 }, endCoordinate: { x: 47.6098, y: 13.0422 }, company: 'Speedy Transport', needsWheelchair: true },
@@ -188,7 +193,7 @@ export class PlannerComponent {
   formattedRoutesArray: any[] = [];
   data!: Observable<any>;
 
-  constructor(/*private vehicleService: vehicleService*/private elementRef: ElementRef, public routePointService: RoutePointService, private personService: PersonService, private vehicleService:  VehicleService, private routeService:  RouteService) {
+  constructor(/*private vehicleService: vehicleService*/private elementRef: ElementRef, public routePointService: RoutePointService, private personService: PersonService, private vehicleService:  VehicleService, private routeService:  RouteService, private transportProviderService: TransportProviderService, private coordinatesService: CoordinatesService) {
     //this.companies = 
 
     //console.dir(this.companies);
@@ -254,14 +259,17 @@ export class PlannerComponent {
 }
 
 onCompanySelected(){
-  
+
+  this.getFilteredVehicles();
+
   const submitButton = document.querySelectorAll('.submit');    
   submitButton[0].classList.add('hide');
 
- // console.log(this.selectedVehicle);
- // console.log(this.selectedCompany);
+  console.log("Selected Company: " + this.selectedCompany);
 
-  this.selectedVehicle = null;
+  //this.selectedVehicle = null;
+
+  this.getFilteredVehiclesById(this.selectedCompany);
 
   this.createVehicleList(this.selectedCompany);
 
@@ -278,7 +286,7 @@ getMapCoordinates(): [any[], boolean] {
     // console.dir(this.vehicles);
   
      //Change WITH NEW VEHILCES!
-    return [this.vehicles.map(vehicles => [vehicles.startCoordinate.x, vehicles.startCoordinate.y]), true];
+    return [this.vehicles.map(vehicles => [vehicles.startCoordinate.latitude, vehicles.startCoordinate.longitude]), true];
   } else {
     // console.log("Soemthing sekected!");
     return [this.formattedRoutesArray, false];
@@ -318,7 +326,7 @@ submitSelectedRoute(){
 
         for(var step of this.selectedRoute.steps){ 
           var isHome = false;
-            console.log(personList);
+            //console.log(personList);
           for(var peop of personList){
       
             if(Number(step.id) >= 10000){
@@ -354,17 +362,18 @@ submitSelectedRoute(){
           );*/
 
        
+          console.log(this.selectedVehicle.id);
 
           var RouteVar: RoutePoint = {
             id: 0,
             description: ""+response.id,
             sequenz: count,
             atHome: isHome,
-            vehicle: this.selectedVehicle.id,
+            vehicleId: this.selectedVehicle.id,
             coordinateId: this.returnCoordId(step.location[1], step.location[0])
           };
           count++;
-          routeSubmit.push(RouteVar);
+          //routeSubmit.push(RouteVar);
       
           this.routePointService.save(RouteVar).subscribe(
             (response) => {console.log('Route point added successfully:', response);},
@@ -436,14 +445,25 @@ private waitForVehicles(): Promise<void> {
   });
 }
 
-createVehicleList(companyName?: string){
+
+
+createVehicleList(companyId?: number){
+  let companyName = null;
+  if(companyId != null){
+    let companyName = this.returnSelectedCompany(companyId)?.companyName
+  }
+
   const findPersonById = (id: number) => this.personDatabase.find(person => person.id === id);
   let vehicleList = document.getElementById("vehicle-list");
   let filteredVehicles = this.vehicles;
 
+
   if (companyName) {
     // Filter vehicles by company name if provided
-    filteredVehicles = this.vehicles.filter(vehicle => vehicle.CompanyName === companyName);
+
+    filteredVehicles = this.vehicles.filter(vehicle => vehicle.CompanyName == companyName);
+
+    console.log(filteredVehicles);
   }
 
 
@@ -452,6 +472,8 @@ createVehicleList(companyName?: string){
  // console.log(this.vehicles);
 
   for(let vehicleObj of filteredVehicles){
+
+    console.log(vehicleObj);
 
     vehicleListHTML +=  
     `<li><label class="vehicle-label-outter" >
@@ -500,6 +522,8 @@ createVehicleList(companyName?: string){
     `
 
     }
+
+
     vehicleList!.innerHTML = vehicleListHTML;
 
     for (let vehicleObj of filteredVehicles) {
@@ -517,6 +541,26 @@ createVehicleList(companyName?: string){
 
   populateSelectBox(){
 
+    this.transportProviderService.getAllTransportProviders().subscribe(
+      (data: any[]) => { 
+        this.transportProvidersDatabase = data.map(transportProvider => ({
+          id: transportProvider.id,
+          companyName: transportProvider.companyName,
+        }));
+        this.transportProviders = this.transportProvidersDatabase;
+
+        // console.log(this.transportProvidersDatabase);
+        // console.log(this.transportProviders);
+        this.updateSelectBox();
+      },
+      (error) => { 
+        console.error('Error fetching transport provider data:', error);
+      }
+    );
+
+    /*console.log(this.transportProvidersDatabase);
+    console.log(this.transportProviders);
+
     this.vehicles.forEach(vehicle => {
       if(!this.companies.includes(vehicle.CompanyName)){
       this.companies.push(vehicle.CompanyName);
@@ -528,31 +572,78 @@ createVehicleList(companyName?: string){
    // console.dir(this.companies);
    // console.dir(this.vehicles);
     const selectBox = document.getElementById('custom-select-box');
-    selectBox!.innerHTML = selectOptionsHtml;
+    selectBox!.innerHTML = selectOptionsHtml;*/
+  }
+
+  updateSelectBox() {
+    let selectOptionsHtml = '<option></option>';
+    for (let transportProvider of this.transportProviders) {
+      selectOptionsHtml += `<option value="${transportProvider.id}">${transportProvider.companyName}</option>`;
+    }
+    const selectBox = document.getElementById('custom-select-box');
+    if (selectBox) {
+      selectBox.innerHTML = selectOptionsHtml;
+    }
+    // console.log(this.transportProviders);
   }
 
 async getFilteredVehicles(): Promise<VehicleLocal[]>  {
 
-  //console.log(this.personDatabase);
-
   await this.waitForVehicles();
-
-  //console.log(this.personDatabase);
-  //console.log(this.vehicles);
 
   this.person = this.personDatabase;
 
   this.getMapCoordinates();
 
+  if(this.selectedCompany == null){
   this.populateSelectBox();
+  this.createVehicleList();
+  }
+
+  //console.log(this.returnSelectedCompany(this.selectedCompany)?.companyName);
+
+ /* if (this.selectedCompany) {
+    //console.log( this.vehicles.filter(vehicle => vehicle.CompanyName == this.returnSelectedCompany(this.selectedCompany)?.companyName));
+    return this.vehicles.filter(vehicle => vehicle.CompanyName == this.returnSelectedCompany(this.selectedCompany)?.companyName);
+  } else {*/
+    return this.vehicles;
+ // }
+}
+
+async getFilteredVehiclesById(id: number): Promise<VehicleLocal[]>  {
+
+  this.vehicles = [];
+  //this.getVehiclesById(id);
+
+  try {
+    // Wait for vehicles to be fetched
+    await this.getVehiclesById(id);
+  } catch (error) {
+    console.error('Error during getVehiclesById:', error);
+    return [];
+  }
+
+  //console.log(this.vehicles);
+
+
+  this.person = this.personDatabase;
+
+  this.getMapCoordinates();
 
   this.createVehicleList();
 
-  if (this.selectedCompany) {
-    return this.vehicles.filter(vehicle => vehicle.CompanyName === this.selectedCompany);
-  } else {
+  //console.log(this.returnSelectedCompany(this.selectedCompany)?.companyName);
+
+ /* if (this.selectedCompany) {
+    //console.log( this.vehicles.filter(vehicle => vehicle.CompanyName == this.returnSelectedCompany(this.selectedCompany)?.companyName));
+    return this.vehicles.filter(vehicle => vehicle.CompanyName == this.returnSelectedCompany(this.selectedCompany)?.companyName);
+  } else {*/
     return this.vehicles;
-  }
+ // }
+}
+
+returnSelectedCompany(id: number): TransportProvider | null {
+  return this.transportProviders.find(company => company.id == this.selectedCompany);
 }
 
 async getCompanyRoute(){
@@ -824,7 +915,37 @@ if(this.selectedVehicle.id != undefined)
   }
 
   
-
+  getVehiclesById(id: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.vehicleService.getVehiclesByTransportProviderId(id).subscribe(
+        (data: any[]) => {
+          this.vehicles = data.map(vehicle => ({
+            id: vehicle.id,
+            CompanyName: vehicle.companyName,
+            startCoordinate: {
+              id: vehicle.startCoordinate.id,
+              longitude: parseFloat(findCoordinates(vehicle.startCoordinate.id, this.coordinates).longitude),
+              latitude: parseFloat(findCoordinates(vehicle.startCoordinate.id, this.coordinates).latitude),
+            },
+            endCoordinate: {
+              id: vehicle.endCoordinate.id,
+              longitude: parseFloat(findCoordinates(vehicle.endCoordinate.id, this.coordinates).longitude),
+              latitude: parseFloat(findCoordinates(vehicle.endCoordinate.id, this.coordinates).latitude),
+            },
+            canTransportWheelchairs: vehicle.canTransportWheelchairs === 1,
+            VehicleDescription: vehicle.vehicleDescription || "No Description",
+            seatingPlaces: vehicle.seatingPlaces,
+          }));
+          resolve();  // Resolve the promise when done
+        },
+        (error) => {
+          console.error('Error fetching vehicle data:', error);
+          reject(error);  // Reject the promise on error
+        }
+      );
+    });
+  }
+  
 
 createRoutes(vehicles: VehicleLocal[], person: PersonLocal[]): RouteMapPoint[] {
   const routes: RouteMapPoint[] = [];
@@ -913,7 +1034,9 @@ async calculateRoute(){
   //const selectedPerson = this.person.filter(person => person.company === this.selectedVehicle.CompanyName);
   let selectedPerson = this.person;
   //Switch comments to select based on companyssss
-  //console.log(selectedPerson);
+  
+  
+  console.log(selectedPerson);
 
 
 
@@ -964,13 +1087,13 @@ selectedPerson = selectedPerson.filter(e => {
     skills: [(person.wheelchair ? 2 : 1)],
     pickup: {
         id: person.id, 
-        name: "TEST",
+        name: "",
         service: 300,
         location: [person.startCoordinate.longitude, person.startCoordinate.latitude] 
     },
     delivery: {
         id: person.id+1000,
-        name: "TEST", 
+        name: "", 
         service: 300, 
         location: [person.endCoordinate.longitude, person.endCoordinate.latitude]
     }
@@ -978,13 +1101,13 @@ selectedPerson = selectedPerson.filter(e => {
   
   //const selectedVehicles = this.vehicles.filter(vehicle => vehicle.CompanyName === this.selectedVehicle.CompanyName);
   let selectedVehicles = this.vehicles;
-  //console.log(selectedVehicles);
+  console.log(selectedVehicles);
 
   selectedVehicles = selectedVehicles.filter(e => {
-    const startLatitude = e.startCoordinate.x != null ? e.startCoordinate.x : 0;
-    const endLatitude = e.endCoordinate.x != null ? e.endCoordinate.x : 0;
-    const startLongitude = e.startCoordinate.y != null ? e.startCoordinate.y : 0;
-    const endLongitude = e.endCoordinate.y != null ? e.endCoordinate.y : 0;
+    const startLatitude = e.startCoordinate.latitude != null ? e.startCoordinate.latitude : 0;
+    const endLatitude = e.endCoordinate.latitude != null ? e.endCoordinate.latitude : 0;
+    const startLongitude = e.startCoordinate.longitude != null ? e.startCoordinate.longitude : 0;
+    const endLongitude = e.endCoordinate.longitude != null ? e.endCoordinate.longitude : 0;
 
     const isValid = (startLatitude >= 45 && startLatitude <= 50) &&
                     (endLatitude >= 45 && endLatitude <= 50) &&
@@ -1009,12 +1132,14 @@ selectedPerson = selectedPerson.filter(e => {
 
 //console.log(selectedVehicles);
 
+console.log(selectedVehicles);
+
   const vehiclesForOptimization = selectedVehicles.map(vehicle => ({
     id: vehicle.id,
     description: vehicle.VehicleDescription + " " + vehicle.CompanyName + " " + vehicle.id + " " + Math.floor((Math.random() * 9999999999) + 1),
     profile: 'driving-car',
-    start: [vehicle.startCoordinate.y, vehicle.startCoordinate.x],
-    end: [vehicle.endCoordinate.y, vehicle.endCoordinate.x],
+    start: [vehicle.startCoordinate.longitude, vehicle.startCoordinate.latitude],
+    end: [vehicle.endCoordinate.longitude, vehicle.endCoordinate.latitude],
     capacity: [vehicle.seatingPlaces],
     max_tasks: 10,
     skills: (vehicle.canTransportWheelchairs ? [1, 2] : [1]),
@@ -1159,14 +1284,13 @@ vehicles$!: Observable<Vehicle[]>;
         (error) => { console.error('Error fetching person data:', error);});
         this.person = this.personDatabase;
     */
-
+/*
     this.vehicleService.getAllVehicles().subscribe(
         (data: any[]) => { 
           
           this.vehicles = data.map(vehicle => ({
             id: vehicle.id,
             CompanyName: vehicle.companyName,
-
             
             startCoordinate: { 
               x: parseFloat(vehicle.startCoordinate.substring(1, vehicle.startCoordinate.indexOf(','))),
@@ -1182,8 +1306,54 @@ vehicles$!: Observable<Vehicle[]>;
           }));
          },
       (error) => { console.error('Error fetching person data:', error);});
+*/
 
-      this.vehicleService
+
+  console.log(this.selectedCompany);
+
+  this.coordinatesService.getAllCoordinates().subscribe(
+    (data: any[]) => {
+    //  console.log(data);
+
+      this.coordinates = data.map(coordinate => ({
+        id: coordinate.id,
+        longitude: parseFloat(coordinate.longitude),
+        latitude: parseFloat(coordinate.latitude)
+      }));
+
+
+
+      this.vehicleService.getAllVehicles().subscribe(
+        (data: any[]) => { 
+         // console.log(data);    
+         // console.log(parseFloat(findCoordinates(1102, this.coordinates).longitude));
+      
+          this.vehicles = data.map(vehicle => ({
+            id: vehicle.id,
+            CompanyName: vehicle.companyName,
+            
+            startCoordinate: { 
+              id: vehicle.startCoordinate.id,
+              longitude: parseFloat(findCoordinates(vehicle.startCoordinate.id, this.coordinates).longitude), /*parseFloat(vehicle.startCoordinates.longitude)*/
+              latitude:  parseFloat(findCoordinates(vehicle.startCoordinate.id, this.coordinates).latitude) /*parseFloat(vehicle.startCoordinates.latitude)*/, 
+            },
+             endCoordinate: { 
+              id: vehicle.endCoordinate.id,
+              longitude: parseFloat(findCoordinates(vehicle.endCoordinate.id, this.coordinates).longitude), /*parseFloat(vehicle.startCoordinates.longitude)*/
+              latitude:  parseFloat(findCoordinates(vehicle.endCoordinate.id, this.coordinates).latitude) /*parseFloat(vehicle.startCoordinates.latitude)*/, 
+         
+            },
+            canTransportWheelchairs: (vehicle.canTransportWheelchairs == 1) ? true : false,
+            VehicleDescription: vehicle.vehicleDescription ? vehicle.vehicleDescription : "No Description",
+            seatingPlaces: vehicle.seatingPlaces
+          }));
+        },
+      (error) => { console.error('Error fetching vehicle data:', error);}
+    );
+
+    },
+    (error) => { console.error('Error fetching coordinates data:', error); }
+  );
 
       this.getFilteredVehicles();
 
@@ -1205,6 +1375,25 @@ vehicles$!: Observable<Vehicle[]>;
 
 }
 
+function findCoordinates(id: number, coordinates: any[]){
+  const foundCoordinate = coordinates.find(coord => coord.id === id);
+  
+  // console.log(foundCoordinate);
+
+  if (foundCoordinate) {
+    return {
+      id: foundCoordinate.id,
+      longitude: foundCoordinate.longitude,
+      latitude: foundCoordinate.latitude
+    };
+  } else {
+    return {
+      id: id,
+      longitude: "14.4073",
+      latitude: "47.2073"
+    };
+  }
+}
 
 function handleCheckboxClick(checkbox: HTMLInputElement) {
   let targetCheckbox;

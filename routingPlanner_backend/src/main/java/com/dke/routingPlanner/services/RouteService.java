@@ -57,6 +57,15 @@ public class RouteService {
                 .map(this::convertToRouteMap)
                 .collect(Collectors.toList());
     }
+
+    public List<Map<String, Object>> getRoutesWithPointsPath() {
+        Iterable<Route> routes = repository.findAll();
+        return StreamSupport.stream(routes.spliterator(), false)
+                .flatMap(route -> routePointRepository.findByRouteIdAndAtHome(route.getId(), true).stream())
+                .map(this::convertToRoutePointMap)
+                .collect(Collectors.toList());
+    }
+
     public List<Map<String, Object>> getRoutesWithPointsByVehicleId(int vehicleId) {
         Iterable<Route> routes = repository.findByVehicleId(vehicleId);
         return StreamSupport.stream(routes.spliterator(), false)
@@ -82,7 +91,7 @@ public class RouteService {
         routePointMap.put("sequence", routePoint.getSequence());
         routePointMap.put("atHome", routePoint.isAtHome());
         routePointMap.put("coordinates", routePoint.getCoordinateId());
-        routePointMap.put("vehicle", routePoint.getVehicle());
+        routePointMap.put("vehicle", routePoint.getVehicleId());
         return routePointMap;
     }
 }

@@ -146,7 +146,7 @@ public class RoutingPlannerController {
                 response.append("Sequenz: ").append(routePoint.getSequenz()).append("<br>");
                 response.append("AtHome: ").append(routePoint.isAtHome()).append("<br>");
                 response.append("Coordinates: ").append(routePoint.getCoordinates()).append("<br>");
-                response.append("Vehicle: ").append(routePoint.getVehicle()).append("<br><br>");
+                response.append("Vehicle: ").append(routePoint.getVehicleId()).append("<br><br>");
                 response.append("CoordinateId: ").append(routePoint.getCoordinateId()).append("<br><br>");
             }
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());

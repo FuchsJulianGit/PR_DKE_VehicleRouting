@@ -3,7 +3,6 @@ import { Routes, RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 
 import { RoutePointListComponent } from './route-point-list/route-point-list.component';
-import { LoginComponent } from './login/login.component';
 import { MapComponent } from './map/map.component';
 import { PlannerComponent } from './planner/planner.component';
 

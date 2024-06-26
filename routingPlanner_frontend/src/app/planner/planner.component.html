@@ -1,249 +1,87 @@
-<style>
-  /* Full-screen overlay to cover the entire viewport */
-  .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Ensure it hovers over other content */
-  }
-  
-  /* Centered content with margins */
-  .popup-content {
-    min-width: 50%;
-    background: white;
-    padding: 2rem;
-    border-radius: 1rem;
-    max-width: 90%; /* Adjust for horizontal margins */
-    max-height: 90vh; /* Adjust for vertical margins */
-    overflow: auto;
-    margin: 2rem; /* Margin to the edges */
-    box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.1); /* Optional shadow for better visibility */
-    position: relative;
-  }
-  
-  /* Close button styling */
-  .close-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: transparent;
-    border: none;
-    font-size: 2rem;
-    cursor: pointer;
-  }
-  
-  /* Route styling */
-  .route {
-    margin-bottom: 2rem;
-    border-bottom: 0.1rem solid #ddd;
-    padding-bottom: 1rem;
-  }
-  
-  .route h2 {
-    margin-top: 0;
-    font-size: 2.4rem;
-  }
-  
-  .route h3 {
-    margin-bottom: 0.5rem;
-    font-size: 2rem;
-  }
-  
-  .route ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .route ul li {
-    margin-bottom: 1rem;
-    padding-left: 1rem;
-    border-left: 0.3rem solid #007bff;
-    font-size: 1.6rem;
-  }
-  
-  .route p{
-    margin-bottom: 1rem;
-    padding-left: 1rem;
-    font-size: 1.6rem;
-  }
-
-  /*.popup-content{
-    
-  }*/
-
-    </style>
- 
- <!--
- <div class="fahrtenblatt popup-overlay">
-    <div class="popup-content">
-      <button class="close-btn" >X</button>
-      <div class="route">
-        <h2>Fahrtenblatt</h2>
-        <p class="text"><strong>Fahrzeug:</strong> Thunderbolt 8000 Speedy Transport 3 4671301272</p>
-        <p class="text"><strong>Fahrten ID:</strong> 36114</p>
-        <p class="text"><strong>Duration:</strong> 36114</p>
-        <h3>Steps</h3>
-        <ul>
-          <li>
-            <p><strong>Type:</strong> start</p>
-            <p><strong>Location:</strong> [13.0419, 47.6097]</p>
-            <p><strong>Service Time:</strong> 0</p>
-          </li>
-          <li>
-            <p><strong>Type:</strong> pickup</p>
-            <p><strong>Location:</strong> [13.0418, 47.6094]</p>
-            <p><strong>Service Time:</strong> 300</p>
-          </li>
-          <li>
-            <p><strong>Type:</strong> pickup</p>
-            <p><strong>Location:</strong> [13.0416, 47.6095]</p>
-            <p><strong>Service Time:</strong> 300</p>
-          </li>
-          <li>
-            <p><strong>Type:</strong> delivery</p>
-            <p><strong>Location:</strong> [16.3717, 48.208]</p>
-            <p><strong>Service Time:</strong> 300</p>
-          </li>
-          <li>
-            <p><strong>Type:</strong> delivery</p>
-            <p><strong>Location:</strong> [14.6625, 47.5311]</p>
-            <p><strong>Service Time:</strong> 300</p>
-          </li>
-          <li>
-            <p><strong>Type:</strong> end</p>
-            <p><strong>Location:</strong> [13.0419, 47.6097]</p>
-            <p><strong>Service Time:</strong> 0</p>
-          </li>
-        </ul>
-      </div>
-
-      <div class="route">
-        <h2>Fahrtenblatt</h2>
-        <p class="text"><strong>Fahrzeug:</strong> Thunderbolt 8000 Speedy Transport 3 4671301272</p>
-        <p class="text"><strong>Fahrten ID:</strong> 36114</p>
-        <p class="text"><strong>Duration:</strong> 36114</p>
-        <h3>Steps</h3>
-        <ul>
-          <li>
-            <p><strong>Type:</strong> start</p>
-            <p><strong>Location:</strong> [13.0419, 47.6097]</p>
-            <p><strong>Service Time:</strong> 0</p>
-          </li>
-          <li>
-            <p><strong>Type:</strong> pickup</p>
-            <p><strong>Location:</strong> [13.0418, 47.6094]</p>
-            <p><strong>Service Time:</strong> 300</p>
-          </li>
-          <li>
-            <p><strong>Type:</strong> pickup</p>
-            <p><strong>Location:</strong> [13.0416, 47.6095]</p>
-            <p><strong>Service Time:</strong> 300</p>
-          </li>
-          <li>
-            <p><strong>Type:</strong> delivery</p>
-            <p><strong>Location:</strong> [16.3717, 48.208]</p>
-            <p><strong>Service Time:</strong> 300</p>
-          </li>
-          <li>
-            <p><strong>Type:</strong> delivery</p>
-            <p><strong>Location:</strong> [14.6625, 47.5311]</p>
-            <p><strong>Service Time:</strong> 300</p>
-          </li>
-          <li>
-            <p><strong>Type:</strong> end</p>
-            <p><strong>Location:</strong> [13.0419, 47.6097]</p>
-            <p><strong>Service Time:</strong> 0</p>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
--->
-
-
-<!-- map-page.component.html -->
-
-
-
-
-
 <div class="container">
-    <div class="sidebar">
-        <div class="fixedHeader">
-            <h2>Fahrzeugauswahl</h2>
+  <div class="sidebar">
+    <div class="fixedHeader">
+      <h2>Fahrzeugauswahl</h2>
 
-            <select id="custom-select-box" class="custom-select" [(ngModel)]="selectedCompany" (change)="onCompanySelected()">
-              <!--<option *ngFor="let company of companies" [value]="company">{{ company }}</option>-->
-            </select>
+      <select
+        id="custom-select-box"
+        class="custom-select"
+        [(ngModel)]="selectedCompany"
+        (change)="onCompanySelected()"
+      >
+        <!-- ** Will be filled with Companies ** -->
+      </select>
+    </div>
 
-        </div>
+    <ul id="vehicle-list"></ul>
+    <!-- ** Will be filled with Selected Vehicles ** -->
+    <ul>
+      <li *ngFor="let vehicle of vehicles$ | async">
+        <label class="vehicle-label-outter">
+          <div
+            class="vehicle-highlight"
+            (click)="selectCheckbox(vehicle, $event)"
+          >
+            <input
+              type="radio"
+              name="vehicle"
+              class="vehicle-radio"
+              [value]="vehicle"
+              id="checkbox-vehicle-{{ vehicle.id }}"
+            />
+            <label
+              class="vehicle-label vehicle-{{ vehicle.id }}"
+              [class.selected]="selectedVehicle === vehicle"
+            >
+              <div class="vehicle-icon">
+                <img src="assets/van-shuttle-solid.svg" alt="Vehicle Icon" />
+              </div>
+            </label>
+            <div class="vehicle-info">
+              <div class="vehicle-title">{{ vehicle.VehicleDescription }}</div>
+              <div class="company-name">{{ vehicle.CompanyName }}</div>
 
-
-        <ul id="vehicle-list"></ul>
-
-        <ul>
-        <!--<li *ngFor="let vehicle of vehicles" (click)="onVehicleSelected(vehicle)">{{ vehicle.name }}</li>-->
-   
-
-
-        <li *ngFor="let vehicle of vehicles$ | async">
-            <label class="vehicle-label-outter" >
-              
-            <div class="vehicle-highlight" (click)="selectCheckbox(vehicle, $event)">
-              <input type="radio" name="vehicle" class="vehicle-radio" [value]="vehicle" id="checkbox-vehicle-{{ vehicle.id }}">
-              <label class="vehicle-label vehicle-{{ vehicle.id }}" [class.selected]="selectedVehicle === vehicle" >
-                <div class="vehicle-icon">
-                    <img src="assets/van-shuttle-solid.svg" alt="Vehicle Icon">
+              <div class="seating">
+                <div class="seating-icon" *ngIf="vehicle.seatingPlaces">
+                  <div class="seatNR">{{ vehicle.seatingPlaces }}</div>
+                  <img
+                    src="../../assets/person-seat.svg"
+                    alt="Seat Accessible"
+                  />
                 </div>
-              </label>
-              <div class="vehicle-info">
-                <div class="vehicle-title">{{ vehicle.vehicleDescription }}</div>
-                <div class="company-name">{{ vehicle.companyName }}</div>
-                
-                <div class="seating">
-                    <div class="seating-icon" *ngIf="vehicle.seatingPlaces">
-                        <div class="seatNR">{{ vehicle.seatingPlaces }}</div>
-                        <img src="../../assets/person-seat.svg" alt="Seat Accessible">
-                    </div>
-                    
-                    <div class="wheelchair-icon" *ngIf="vehicle.canTransportWheelchairs">
-                        <div class="seatNR"></div>
-                        <img src="../../assets/wheelchair-solid.svg" alt="Wheelchair Accessible">
-                    </div>
+
+                <div
+                  class="wheelchair-icon"
+                  *ngIf="vehicle.canTransportWheelchairs"
+                >
+                  <div class="seatNR"></div>
+                  <img
+                    src="../../assets/wheelchair-solid.svg"
+                    alt="Wheelchair Accessible"
+                  />
                 </div>
               </div>
             </div>
-          
-              <div class="person-list" *ngIf="selectedVehicle">
-                <h3>{{ selectedVehicle.CompanyName }} Employees:</h3>
-                <ul id="vehicle-personList-{{ vehicle.id }}">
-                    <!-- *** Will be filled with persons *** -->
-                </ul>
-            </div>
+          </div>
 
-            </label>
-          </li>
-        </ul>
-
-
-        
+          <div class="person-list" *ngIf="selectedVehicle">
+            <h3>{{ selectedVehicle.CompanyName }} Employees:</h3>
+            <ul id="vehicle-personList-{{ vehicle.id }}">
+              <!-- *** Will be filled with persons *** -->
+            </ul>
+          </div>
+        </label>
+      </li>
+    </ul>
   </div>
-  
+
   <div class="submit hide">
-    <button class="btn btn-primary" (click)="submitSelectedRoute()">Submit Route</button>
+    <button class="btn btn-primary" (click)="submitSelectedRoute()">
+      Submit Route
+    </button>
   </div>
 
   <div class="map-outter-container">
-   <!--<app-map></app-map> --> 
-    <!-- <app-map [mapCoordinatesInput]="getMapCoordinates()"></app-map> -->
     <app-map [inputValue]="getMapCoordinates()"></app-map>
-
   </div>
 </div>
-  

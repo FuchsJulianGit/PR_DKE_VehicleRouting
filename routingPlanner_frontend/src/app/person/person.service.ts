@@ -2,14 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Person } from '../Interfaces/route-point';
+import { Person } from '../Interfaces/interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PersonService {
 
-  //private baseUrl = 'http://localhost:8080/';
   private baseUrl = 'http://localhost:8082/';
 
   constructor(private http: HttpClient) { }
