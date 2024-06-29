@@ -15,6 +15,9 @@ public class RoutePointService {
     @Autowired
     private RoutePointRepository repository;
 
+    @Autowired
+    private RouteService routeService;
+
     public RoutePoint saveRoutePoint(RoutePoint routePoint) {
         return repository.save(routePoint);
     }
@@ -26,12 +29,6 @@ public class RoutePointService {
     public List<RoutePoint> getRoutePoint() {
         return (List<RoutePoint>) repository.findAll();
     }
-
-    /*public List<RoutePoint> getRoutePointByVehicleId(int vehicleId) {
-        return (List<RoutePoint>) repository.findByVehicle(vehicleId);
-    }*/
-
-
 
     public RoutePoint getRoutePoint(int id) {
         return repository.findById(id).orElse(null);
@@ -79,7 +76,7 @@ public class RoutePointService {
                 "routeId", routePoint.getRouteId(),
                 "sequence", routePoint.getSequence(),
                 "atHome", routePoint.isAtHome(),
-                "vehicleId", routePoint.getVehicleId(),
+                "vehicleId", /*routePoint.getVehicleId()*/  routeService.getVehicleIdByRoutePoint(routePoint.getRouteId()),
                 "coordinateId", routePoint.getCoordinateId()
         );
     }

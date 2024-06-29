@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { Coordinates, Vehicle } from '../Interfaces/interfaces';
+import { Coordinates, Vehicle } from '../interfaces/interfaces';
 
 @Injectable({
   providedIn: 'root'

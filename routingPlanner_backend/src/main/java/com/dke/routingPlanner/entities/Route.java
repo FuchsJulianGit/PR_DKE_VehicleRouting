@@ -2,7 +2,7 @@ package com.dke.routingPlanner.entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "ROUTES")
+@Table(name = "ROUTE")
 public class Route {
 
     @Id

@@ -8,7 +8,6 @@ import { PlannerComponent } from './planner/planner.component';
 
 export const routes: Routes = [
    { path: '', component: PlannerComponent},
-   /*{ path: 'login', component: LoginComponent },*/
    { path: 'map', component: MapComponent },
    { path: 'planner', component: PlannerComponent }  
 ];

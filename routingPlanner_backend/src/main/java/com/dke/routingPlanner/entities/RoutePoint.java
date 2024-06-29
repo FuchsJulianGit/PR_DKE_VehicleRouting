@@ -18,8 +18,9 @@ public class RoutePoint {
     @Column(name = "ATHOME")
     private boolean atHome;
 
-    @Column(name = "VEHICLE_ID")
+    /*Column(name = "VEHICLE_ID")
     private int vehicleId;
+*/
 
     @Column(name = "COORDINATE_ID")
     private int coordinateId;
@@ -66,13 +67,13 @@ public class RoutePoint {
         this.coordinateId = coordinateId;
     }
 
-    public int getVehicleId() {
+   /* public int getVehicleId() {
         return vehicleId;
     }
 
     public void setVehicleId(int vehicleId) {
         this.vehicleId = vehicleId;
-    }
+    }*/
 
     public int getCoordinateId() {
         return coordinateId;

@@ -83,11 +83,22 @@ public class RouteController {
     // Example of endpoints not implemented but defined for demonstration
     @GetMapping("/Wegstrecken")
     public ResponseEntity<?> getWegstrecke() {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Endpoint not implemented");
+        try {
+            List<Map<String, Object>> routes = routeService.getRoutesWithPoints();
+            return ResponseEntity.status(HttpStatus.OK).body(routes);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch routes with points: " + e.getMessage());
+        }
+       // return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Endpoint not implemented");
     }
 
     @GetMapping("/Fahrtenblätter")
     public ResponseEntity<?> getDriveplan() {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Endpoint not implemented");
+        try {
+            List<Map<String, Object>> routes = routeService.getRoutesWithPointsPath();
+            return ResponseEntity.status(HttpStatus.OK).body(routes);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch routes with points: " + e.getMessage());
+        }
     }
 }

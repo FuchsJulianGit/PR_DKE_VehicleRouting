@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { RoutePoint, Person, Vehicle } from '../Interfaces/interfaces'
+import { RoutePoint, Person, Vehicle } from '../interfaces/interfaces'
 
 @Injectable({
   providedIn: 'root'
@@ -17,9 +17,8 @@ export class RoutePointService {
     return this.http.get<RoutePoint[]>(this.baseurl + 'RoutePoints');
   }
   
-  
-  save(route_point: RoutePoint): Observable<RoutePoint> {
-    return this.http.post<RoutePoint>(this.baseurl + 'addRoutePoint', route_point);
+  save(route_point: any): Observable<RoutePoint> {
+    return this.http.post<any>(this.baseurl + 'addRoutePoint', route_point);
   }
 
   public findAll(): Observable<RoutePoint[]>{

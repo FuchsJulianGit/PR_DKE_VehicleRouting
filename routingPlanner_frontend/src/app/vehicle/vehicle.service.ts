@@ -2,14 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Vehicle } from '../Interfaces/interfaces';
+import { Vehicle } from '../interfaces/interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VehicleService {
 
- //private baseUrl = 'http://localhost:8080/vehicles'; 
   private baseUrl = 'http://localhost:8081/vehiclesByTransportProviderId';
 
   constructor(private http: HttpClient) { }
@@ -20,7 +19,7 @@ export class VehicleService {
 
   getVehiclesByTransportProviderId(transportProviderId: number): Observable<Vehicle[]> {
 
-    console.log("Selected Id: " + transportProviderId);
+    console.log("Selected Id: [Show for demonstration purposes] " + transportProviderId);
 
     const url = this.baseUrl + "/" + transportProviderId;
     return this.http.get<Vehicle[]>(url);

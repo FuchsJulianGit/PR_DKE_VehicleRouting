@@ -83,6 +83,11 @@ public class RouteService {
         return routeMap;
     }
 
+    public int getVehicleIdByRoutePoint(int routeId) {
+        Route route = repository.findById(routeId).orElseThrow();
+        return route.getVehicleId();
+    }
+
     private Map<String, Object> convertToRoutePointMap(RoutePoint routePoint) {
         Map<String, Object> routePointMap = new HashMap<>();
         Route route = repository.findById(routePoint.getRouteId()).orElseThrow();
@@ -91,7 +96,7 @@ public class RouteService {
         routePointMap.put("sequence", routePoint.getSequence());
         routePointMap.put("atHome", routePoint.isAtHome());
         routePointMap.put("coordinates", routePoint.getCoordinateId());
-        routePointMap.put("vehicle", routePoint.getVehicleId());
+        routePointMap.put("vehicle", route.getVehicleId());
         return routePointMap;
     }
 }

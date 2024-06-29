@@ -7,6 +7,18 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+
+/*
+ *
+ *
+ *
+ *
+ *  IMPLEMENTATION FOR TEST PURPOSES
+ *
+ *
+ *
+ *
+ */
 @Service
 public class VehicleService {
 
